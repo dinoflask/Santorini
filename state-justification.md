@@ -2,22 +2,27 @@
 Below, describe where you stored each of the following states and justify your answers with design principles/goals/heuristics/patterns. Discuss the alternatives and trade-offs you considered during your design process.
 
 ## Players
-<fill your anwsers here>
+<Game class, as the game needs to control the players.>
 
 ## Current player
-<fill your anwsers here>
+<Game class, as the players should not be responsible for keeping track of turn>
 
 ## Worker locations
-<fill your anwsers here>
+<Worker class, as the worker should be able to return its own location.>
 
 ## Towers
-<fill your anwsers here>
+<Space, because the Information Expert heuristic indicates that we should allow 
+the class with the most information to calculate whether it itself is a
+tower or not.>
 
 ## Winner
-<fill your anwsers here>
+<Game, as no other class should realistically have to end the game.>
 
 ## Design goals/principles/heuristics considered
-<fill your anwsers here>
+<High cohesion, Low coupling, Law of Demeter>
 
 ## Alternatives considered and analysis of trade-offs
-<fill your anwsers here>
+<One alternative considered was giving Player the ability to build and move
+Workers, however, I felt there was too much coupling with the Player and the
+Game class. The player is not connected to the board instance, but Game is,
+so it was eaiser to modify the board from Game.>
