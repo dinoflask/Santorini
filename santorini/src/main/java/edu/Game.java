@@ -1,141 +1,87 @@
 package edu;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Game {
-    private final List<Player> players;
-    private final Board board;
-    private boolean winState;
-    private Player winningPlayer;
-    private int currentPlayerIndex;
+import edu.Buildings.BuildType;
 
-    public Game(List<Player> players, Board board) {
-        if (players.size() != 2) {
-            throw new IllegalArgumentException("Game requires exactly 2 players.");
-        }
-        this.players = players;
-        this.board = board;
-        this.winState = false;
-        this.winningPlayer = null;
+public class Game {
+    private boolean winState;
+    private final int size;
+    private final Board board;
+    private final List<Player> players;
+    private int currentPlayerIndex;
+    private int winnerPlayerIndex;
+
+    public Game(Player player1, Player player2) {
+        this.size = 5;
+        this.board = new Board(size);
+
+        this.players = new ArrayList<>();
+        this.players.add(player1);
+        this.players.add(player2);
+
         this.currentPlayerIndex = 0;
-        this.players.get(this.currentPlayerIndex).setTurn(true);
+        this.winState = false;
+        this.winnerPlayerIndex = -1;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public List<Player> getPlayers() {
+        return new ArrayList<>(players);
     }
 
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
 
-    public void nextTurn() {
-        players.get(currentPlayerIndex).setTurn(false);
+    public int getWinnerPlayerIndex() {
+        return winnerPlayerIndex;
+    }
+
+    public void switchTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        players.get(currentPlayerIndex).setTurn(true);
     }
 
-    private boolean isPlayersTurn(Player player) {
-        return player.equals(getCurrentPlayer());
-    }
-
-    public boolean isMoveLegal(Space current, Space target) {
-        int dx = Math.abs(target.getX() - current.getX());
-        int dy = Math.abs(target.getY() - current.getY());
-        if (dx > 1 || dy > 1 || (dx == 0 && dy == 0)) {
-            return false;
-        }
-        if (target.isOccupied() || target.hasDome()) {
-            return false;
-        }
-        int currentLevel = current.getLevel();
-        int targetLevel = target.getLevel();
-        if (targetLevel - currentLevel > 1) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean placeWorker(Player player, int x, int y) {
-        Space space = board.getSpace(x, y);
-        if (space.isOccupied() || player.getWorkers().size() >= 2) {
-            return false;
-        }
-        Worker worker = new Worker(player, space);
-        player.getWorkers().add(worker);
-        space.addWorker(worker);
-        return true;
-    }
-
-    public boolean moveWorker(Player player, Worker worker, int newX, int newY) {
+    // Main game action: take a turn with move and build
+    public void takeTurn(int workerIndex, Space moveTarget, Space buildTarget, BuildType buildType) {
         if (winState) {
-            System.out.println("Game is over, no more moves allowed.");
-            return false;
-        }
-        
-        if (!isPlayersTurn(player)) {
-            System.out.println("Not " + player.getName() + "'s turn");
-            return false;
-        }
-        if (!player.getWorkers().contains(worker)) {
-            return false;
-        }
-        Space current = worker.getSpace();
-        Space target = board.getSpace(newX, newY);
-        if (!isMoveLegal(current, target)) {
-            return false;
-        }
-        current.removeWorker(worker);
-        target.addWorker(worker);
-        worker.moveTo(target);
-        if (target.getLevel() == 3) {
-            endGame(player);
-        }
-        return true;
-    }
-
-    public boolean buildAt(Player player, int x, int y, boolean dome) {
-        if (winState) {
-            System.out.println("Game is over, no more moves allowed.");
-            return false;
+            throw new IllegalStateException("Game is already over");
         }
 
-        if (!isPlayersTurn(player)) {
-            System.out.println("Not " + player.getName() + "'s turn");
-            return false;
+        Player currentPlayer = getCurrentPlayer();
+        Worker worker = currentPlayer.selectWorker(workerIndex);
+
+        // Move phase
+        Space currentSpace = worker.getSpace();
+        if (currentSpace == null) {
+            throw new IllegalStateException("Worker not placed on board");
         }
-        Space space = board.getSpace(x, y);
-        if (space.isOccupied()) {
-            return false;
+
+        if (!moveTarget.canMoveTo(currentSpace)) {
+            throw new IllegalArgumentException("Invalid move");
         }
-        if (dome) {
-            if (space.getLevel() == 3 && !space.hasDome()) {
-                space.buildDome();
-                nextTurn();
-                return true;
-            }
-            return false;
-        } else {
-            if (space.getLevel() < 3 && !space.hasDome()) {
-                space.buildBlock();
-                nextTurn();
-                return true;
-            }
-            return false;
+
+        worker.moveTo(moveTarget);
+
+        // Check win condition (reached level 3)
+        if (moveTarget.getTower().getLevel() == 3) {
+            winState = true;
+            winnerPlayerIndex = currentPlayerIndex;
+            return;
         }
-    }
 
-    public void endGame(Player winner) {
-        this.winState = true;
-        this.winningPlayer = winner;
-        System.out.println("Game Over! Player " + winner.getName() + " wins!");
-    }
+        // Build phase
+        if (!buildTarget.canBuildOn(moveTarget, buildType)) {
+            throw new IllegalArgumentException("Invalid build");
+        }
 
-    public boolean isWinState() {
-        return winState;
-    }
+        worker.buildOn(buildTarget, buildType);
 
-    public Player getWinningPlayer() {
-        return winningPlayer;
-    }
-
-    public Board getBoard() {
-        return board;
+        // Switch turn after successful move and build
+        switchTurn();
     }
 }

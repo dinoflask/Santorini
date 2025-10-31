@@ -1,14 +1,14 @@
 package edu;
 
-//Worker is also a data holder, and has a setter called moveTo.
-public class Worker {
-    private Player owner;
-    private Space space;
+import edu.Buildings.BuildType;
 
-    public Worker(Player owner, Space initialSpace) {
+public class Worker {
+    private Space space;
+    private final Player owner;
+
+    public Worker(Player owner) {
         this.owner = owner;
-        this.space = initialSpace;
-        this.space.addWorker(this);
+        this.space = null;
     }
 
     public Player getOwner() {
@@ -19,7 +19,27 @@ public class Worker {
         return space;
     }
 
-    public void moveTo(Space newSpace) {
-        this.space = newSpace;
+    public boolean canPlaceTo(Space target) {
+        return !target.isOccupiedBy() && !target.getTower().hasDome();
+    }
+
+    public void placeTo(Space target) {
+        if (this.space != null) {
+            this.space.setOccupiedBy(null);
+        }
+        this.space = target;
+        target.setOccupiedBy(this);
+    }
+
+    public void moveTo(Space target) {
+        if (this.space != null) {
+            this.space.setOccupiedBy(null);
+        }
+        this.space = target;
+        target.setOccupiedBy(this);
+    }
+
+    public void buildOn(Space target, BuildType type) {
+        target.getTower().build(type);
     }
 }

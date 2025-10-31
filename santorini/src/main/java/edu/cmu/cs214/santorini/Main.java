@@ -3,114 +3,54 @@ package edu.cmu.cs214.santorini;
 import edu.Board;
 import edu.Game;
 import edu.Player;
-import edu.Worker;
-import edu.Space;
-
-import java.util.ArrayList;
-import java.util.List;
+import edu.Buildings.BuildType;
 
 public class Main {
     public static void main(String[] args) {
-        // Initialize players and board
-        Player playerA = new Player("A");
-        Player playerB = new Player("B");
-        List<Player> players = new ArrayList<>();
-        players.add(playerA);
-        players.add(playerB);
+        System.out.println("=== Santorini Game Demo ===\n");
 
-        Board board = new Board();
-        Game game = new Game(players, board);
+        // Initialize game
+        Player player1 = new Player("Alice");
+        Player player2 = new Player("Bob");
+        Game game = new Game(player1, player2);
+        Board board = game.getBoard();
 
-        // Place workers at starting positions
-        System.out.println("Placing workers...");
-        printResult(game.placeWorker(playerA, 0, 0), "Player A worker at (0,0)");
-        printResult(game.placeWorker(playerA, 1, 0), "Player A worker at (1,0)");
-        printResult(game.placeWorker(playerB, 4, 4), "Player B worker at (4,4)");
-        printResult(game.placeWorker(playerB, 3, 4), "Player B worker at (3,4)");
+        System.out.println("Game initialized with players: Alice and Bob");
+        System.out.println("Board size: " + board.getSize() + "x" + board.getSize());
+        System.out.println("Current player: " + game.getCurrentPlayer().getId());
+        System.out.println();
 
-        // Simulate moves and builds
-        Worker aWorker = playerA.getWorkers().get(0);
-        Worker bWorker = playerB.getWorkers().get(0);
+        // Place workers
+        System.out.println("Placing workers on the board...");
+        player1.getWorkers().get(0).placeTo(board.getSpace(0, 0));
+        player1.getWorkers().get(1).placeTo(board.getSpace(0, 1));
+        player2.getWorkers().get(0).placeTo(board.getSpace(4, 4));
+        player2.getWorkers().get(1).placeTo(board.getSpace(4, 3));
+        System.out.println("Alice's workers at (0,0) and (0,1)");
+        System.out.println("Bob's workers at (4,4) and (4,3)");
+        System.out.println();
 
-        System.out.println("Player A moves worker from (0,0) to (0,1)");
-        printResult(game.moveWorker(playerA, aWorker, 0, 1), "Move success");
+        // Demonstrate a few turns
+        System.out.println("--- Turn 1: Alice ---");
+        game.takeTurn(0, board.getSpace(1, 1), board.getSpace(1, 0), BuildType.BLOCK);
+        System.out.println("Alice moved worker to (1,1) and built a block at (1,0)");
+        System.out.println("Current player: " + game.getCurrentPlayer().getId());
+        System.out.println();
 
-        System.out.println("Player A builds block at (1,1)");
-        printResult(game.buildAt(playerA, 1, 1, false), "Build block success");
+        System.out.println("--- Turn 2: Bob ---");
+        game.takeTurn(0, board.getSpace(3, 3), board.getSpace(3, 4), BuildType.BLOCK);
+        System.out.println("Bob moved worker to (3,3) and built a block at (3,4)");
+        System.out.println("Current player: " + game.getCurrentPlayer().getId());
+        System.out.println();
 
-        System.out.println("Player B tries to move onto occupied space (0,1)");
-        printResult(game.moveWorker(playerB, bWorker, 0, 1), "Move success");
+        System.out.println("--- Turn 3: Alice ---");
+        game.takeTurn(0, board.getSpace(2, 1), board.getSpace(1, 0), BuildType.BLOCK);
+        System.out.println("Alice moved worker to (2,1) and built at (1,0) - now level 2");
+        System.out.println("Tower at (1,0) level: " + board.getSpace(1, 0).getTower().getLevel());
+        System.out.println();
 
-        System.out.println("Player B moves worker from (4,4) to (3,3)");
-        printResult(game.moveWorker(playerB, bWorker, 3, 3), "Move success");
-
-        System.out.println("Player B builds block at (3,2)");
-        printResult(game.buildAt(playerB, 3, 2, false), "Build block success");
-
-        System.out.println("Player A moves worker from (0,1) to (1,1)");
-        printResult(game.moveWorker(playerA, aWorker, 1, 1), "Move success");
-
-        System.out.println("Player A builds block at (0,1)");
-        printResult(game.buildAt(playerA, 0, 1, false), "Build block success");
-
-        System.out.println("Player B moves worker from (3,3) to (3,2)");
-        printResult(game.moveWorker(playerB, bWorker, 3, 2), "Move success");
-
-        System.out.println("Player B builds block at (3,3)");
-        printResult(game.buildAt(playerB, 3, 3, false), "Build block success");
-
-        System.out.println("Player A moves worker from (1,1) to (0,1)");
-        printResult(game.moveWorker(playerA, aWorker, 0, 1), "Move success");
-
-        System.out.println("Player A builds block at (1,1)");
-        printResult(game.buildAt(playerA, 1, 1, false), "Build block success");
-
-        System.out.println("Player B moves worker from (3,2) to (3,3)");
-        printResult(game.moveWorker(playerB, bWorker, 3, 3), "Move success");
-
-        System.out.println("Player B builds block at (3,2)");
-        printResult(game.buildAt(playerB, 3, 2, false), "Build block success");
-
-        System.out.println("Player A moves worker from (0,1) to (1,1)");
-        printResult(game.moveWorker(playerA, aWorker, 1, 1), "Move success");
-
-        System.out.println("Player A builds block at (0,1)");
-        printResult(game.buildAt(playerA, 0, 1, false), "Build block success");
-
-        System.out.println("Player B moves worker from (3,3) to (3,2)");
-        printResult(game.moveWorker(playerB, bWorker, 3, 2), "Move success");
-
-        System.out.println("Player B builds block at (3,3)");
-        printResult(game.buildAt(playerB, 3, 3, false), "Build block success");
-
-        System.out.println("Player A moves worker from (1,1) to (0,1)");
-        printResult(game.moveWorker(playerA, aWorker, 0, 1), "Move success");
-
-        //fail!
-        System.out.println("Player A builds dome at (1,1)");
-        printResult(game.buildAt(playerA, 1, 1, true), "Build block success");
-
-        System.out.println("Player A builds block at (1,1)");
-        printResult(game.buildAt(playerA, 1, 1, false), "Build block success");
-
-        System.out.println("Player B moves worker from (3,2) to (3,3)");
-        printResult(game.moveWorker(playerB, bWorker, 3, 3), "Move success");
-
-        System.out.println("Player B builds block at (3,2)");
-        printResult(game.buildAt(playerB, 3, 2, false), "Build block success");
-
-        System.out.println("Player A moves worker from (0,1) to (1,1)");
-        printResult(game.moveWorker(playerA, aWorker, 1, 1), "Move success");
-
-        if (game.isWinState()) {
-            System.out.println("Game won by player: " + game.getWinningPlayer().getName());
-            return;
-        } else {
-            System.out.println("Game not won yet.");
-        }
+        System.out.println("=== Demo Complete ===");
+        System.out.println("\nTo run comprehensive tests, use: mvn test");
     }
 
-    private static void printResult(boolean outcome, String message) {
-        System.out.println(message + ": " + (outcome ? "Success" : "Failure"));
-    }
 }

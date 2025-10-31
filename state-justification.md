@@ -1,28 +1,25 @@
 # Justification for handling state
 Below, describe where you stored each of the following states and justify your answers with design principles/goals/heuristics/patterns. Discuss the alternatives and trade-offs you considered during your design process.
 
-## Players
-<Game class, as the game needs to control the players.>
+Players
+Players are stored in the Game class, since Game orchestrates the overall flow and must coordinate all players. This follows Information Expert and encapsulates player management within the game logic.
 
-## Current player
-<Game class, as the players should not be responsible for keeping track of turn>
+Current player
+The current player index is managed by Game rather than by, say, the players. This centralizes turn logic and avoids coupling turn-tracking to any individual Player, promoting low coupling.
 
-## Worker locations
-<Worker class, as the worker should be able to return its own location.>
+Worker locations
+Each Worker stores its own location. This makes Worker the Information Expert for its position, enabling direct queries and updates without depending on Board or Space to look up worker locations.
 
-## Towers
-<Space, because the Information Expert heuristic indicates that we should allow 
-the class with the most information to calculate whether it itself is a
-tower or not.>
+Towers
+Tower state is held in Space. Space best knows its own contents and levels, so it naturally encapsulates tower logic and queries. This maximizes cohesion and makes expansion (like new tower logic) easier.
 
-## Winner
-<Game, as no other class should realistically have to end the game.>
+Winner
+Game stores the winner, as it has full visibility and authority over game progress and end conditions. No other class has enough context to determine or enforce victory.
 
-## Design goals/principles/heuristics considered
-<High cohesion, Low coupling, Law of Demeter>
+Design goals/principles/heuristics considered
+Key goals included high cohesion (each class does one thing well), low coupling (minimal dependencies), and Law of Demeter (only talk to immediate collaborators).
 
-## Alternatives considered and analysis of trade-offs
-<One alternative considered was giving Player the ability to build and move
-Workers, however, I felt there was too much coupling with the Player and the
-Game class. The player is not connected to the board instance, but Game is,
-so it was eaiser to modify the board from Game.>
+Alternatives considered and analysis of trade-offs
+Considered tracking worker locations on the Board or Space, but this would split responsibility and require syncing between classes.
+
+I also considered that Player could handle turn-tracking, but then Player and Game would need to coordinate closely, increasing coupling. Managing turns in Game keeps responsibilities clear.

@@ -4,29 +4,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    private String name;
-    private List<Worker> workers;
-    private boolean turn;
+    private final String id;
+    private final List<Worker> workers;
 
-    public Player(String name) {
-        this.name = name;
+
+    public Player(String id) {
+        this.id = id;
         this.workers = new ArrayList<>();
-        this.turn = false;
+
+        // Initialize 2 workers per player
+        workers.add(new Worker(this));
+        workers.add(new Worker(this));
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public List<Worker> getWorkers() {
-        return workers;
+        return new ArrayList<>(workers);
     }
 
-    public boolean isTurn() {
-        return turn;
+    public Worker selectWorker(int index) {
+        if (index < 0 || index >= workers.size()) {
+            throw new IllegalArgumentException("Invalid worker index");
+        }
+        return workers.get(index);
     }
 
-    public void setTurn(boolean turn) {
-        this.turn = turn;
+    public void placeWorker(Space target) {
+        for (Worker worker : workers) {
+            if (worker.getSpace() == null && worker.canPlaceTo(target)) {
+                worker.placeTo(target);
+                return;
+            }
+        }
+        throw new IllegalStateException("No available worker to place");
     }
 }
