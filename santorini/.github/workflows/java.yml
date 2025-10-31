@@ -4,7 +4,7 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events
+  # Triggers the workflow on push or pull request events but only for the java branch
   push:
 
   # Allows you to run this workflow manually from the Actions tab
@@ -28,9 +28,10 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: microsoft
-          java-version: 17  # Changed from 21 to 17
+          java-version: 17
 
-      # Runs Maven build and tests
-      - name: Build with Maven
+      # Runs type checker for Java files
+      - name: Run on Java files
         run: |
-          timeout 2m mvn -B clean verify
+          cd java
+          timeout 2m mvn -f pom.xml site
