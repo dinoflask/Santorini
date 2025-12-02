@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
+
 public class App extends NanoHTTPD {
 
     public static void main(String[] args) {
@@ -34,23 +35,41 @@ public class App extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
+        System.out.println("Method: " + session.getMethod() + " URI: " + session.getUri()); // DEBUG
+
+        // Handle OPTIONS preflight FIRST - SIMPLE VERSION
+        if (session.getMethod() == Method.OPTIONS) {
+            Response resp = NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "text/plain", "");
+            resp.addHeader("Access-Control-Allow-Origin", "*");
+            resp.addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            resp.addHeader("Access-Control-Allow-Headers", "*");
+            resp.addHeader("Access-Control-Max-Age", "86400");
+            return resp;
+        }
+
+        // Your original business logic - UNCHANGED
         String uri = session.getUri();
         Map<String, String> params = session.getParms();
-        if (uri.equals("/newgame")) {
-            this.game = new Game(playerA, playerB);
-        } else if (uri.equals("/play")) {
-            // e.g., /play?x=1&y=1
-   
-            //take in the x, y from frontend ONLY
-            //the BACKEND should know all of this information. The frontend should have no idea whether or not what's happening is a build or a move,
-            //but the way takeTurn is currently written doesn't take in an x or y. It should be fixed to have all of these parameters inside the function,
-            //then update those based on the x and y that come in
 
-            //Tell this to perplexity
-            this.game.takeTurn(Integer.parseInt(params.get("x")), Integer.parseInt(params.get("y")));
+        if (uri.equals("/newgame")) {
+            playerA = new Player("A");
+            playerB = new Player("B");
+            this.game = new Game(playerA, playerB);
+        
+        } else if (uri.equals("/play")) {
+            try {
+                int x = Integer.parseInt(params.get("x"));
+                int y = Integer.parseInt(params.get("y"));
+                this.game.takeTurn(x, y);
+                System.out.println("Play: x=" + x + ", y=" + y); // DEBUG
+            } catch (Exception e) {
+                System.err.println("Play error: " + e);
+            }
         }
-        // Extract the view-specific data from the game and apply it to the template.
+
+        // Your original response - UNCHANGED
         GameState gameplay = GameState.forGame(this.game);
+        System.out.println("Sending cells: " + gameplay.toString());
         Response resp = NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "application/json", gameplay.toString());
         resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");

@@ -47,13 +47,21 @@ class App extends React.Component<Props, GameState> {
    * just an issue of Javascript.
    */
   newGame = async () => {
-    const response = await fetch("http://localhost:8080/newgame");
-    const json = await response.json();
-    this.setState({ cells: json["cells"] });
-    this.setState({ currentPlayer: json["currentPlayer"] });
-    this.setState({ winner: json["winner"] });
+    try {
+      const response = await fetch("http://localhost:8080/newgame");
+      const json = await response.json();
+
+      // SINGLE batched setState - merges all properties
+      this.setState({
+        cells: json["cells"],
+        currentPlayer: json["currentPlayer"],
+        winner: json["winner"],
+      });
+    } catch (error) {
+      console.error("New Game failed:", error);
+    }
   };
-  
+
   /**
    * play will generate an anonymous function that the component
    * can bind with.
@@ -127,9 +135,9 @@ class App extends React.Component<Props, GameState> {
     if (this.state.winner == -1) {
       instructionsText = `Current turn: ${this.state.currentPlayer}`;
     } else {
-      if (this.state.winner == 0){
+      if (this.state.winner == 0) {
         instructionsText = `Winner: A`;
-      }else {
+      } else {
         instructionsText = `Winner: B`;
       }
     }
@@ -146,7 +154,6 @@ class App extends React.Component<Props, GameState> {
         </div>
       </div>
     );
-
   }
 }
 
