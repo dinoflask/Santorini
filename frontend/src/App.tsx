@@ -40,6 +40,7 @@ class App extends React.Component<Props, GameState> {
       winner: null,
       turnPhase: null,
       godCards: [],
+      canPassBuild: false,
     };
   }
 
@@ -60,6 +61,7 @@ class App extends React.Component<Props, GameState> {
         winner: json["winner"],
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
+        canPassBuild: json["canPassBuild"] ?? false,
       });
     } catch (error) {
       console.error("New Game failed:", error);
@@ -79,10 +81,14 @@ class App extends React.Component<Props, GameState> {
       e.preventDefault();
       const response = await fetch(`http://localhost:8080/play?x=${x}&y=${y}`);
       const json = await response.json();
-      this.setState({ cells: json["cells"] });
-      this.setState({ currentPlayer: json["currentPlayer"] });
-      this.setState({ winner: json["winner"] });
-      this.setState({ turnPhase: json["turnPhase"] });
+      this.setState({
+        cells: json["cells"],
+        currentPlayer: json["currentPlayer"],
+        winner: json["winner"],
+        turnPhase: json["turnPhase"],
+        godCards: json["godCards"] ?? [],
+        canPassBuild: json["canPassBuild"] ?? false,
+      });
     };
   }
 
@@ -103,6 +109,8 @@ class App extends React.Component<Props, GameState> {
         currentPlayer: json["currentPlayer"],
         winner: json["winner"],
         turnPhase: json["turnPhase"],
+        godCards: json["godCards"] ?? [],
+        canPassBuild: json["canPassBuild"] ?? false,
       });
     };
   }
@@ -180,9 +188,14 @@ class App extends React.Component<Props, GameState> {
         <div id="instructions">{instructionsText}</div>
         <div id="bottombar">
           <button onClick={this.newGame}>New Game</button>
+
+          {this.state.turnPhase === "BUILD" && this.state.canPassBuild && (
+            <button onClick={this.passBuild}>Skip extra build</button>
+          )}
         </div>
       </div>
     );
+
   }
   renderGodSelection(): React.ReactNode {
     const gods = this.state.godCards; // comes from backend
@@ -200,6 +213,19 @@ class App extends React.Component<Props, GameState> {
       </div>
     );
   }
+  passBuild: React.MouseEventHandler = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:8080/passBuild");
+    const json = await response.json();
+    this.setState({
+      cells: json["cells"],
+      currentPlayer: json["currentPlayer"],
+      winner: json["winner"],
+      turnPhase: json["turnPhase"],
+      godCards: json["godCards"] ?? [],
+      canPassBuild: json["canPassBuild"] ?? false,
+    });
+  };
 }
 
 

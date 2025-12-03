@@ -178,9 +178,17 @@ public class Game {
         activeWorker = null;
     }
     break;
-
-
         }
+    }
+    
+    public void passBuild() {
+        // Player is choosing to skip remaining builds this turn
+        switchTurn();
+        turnPhase = TurnPhase.SELECTION;
+        activeWorker = null;
+
+        // If you need to reset any per-turn state in rules (like Demeter),
+        // you can later add a hook here (e.g. currentPlayer.getBuildRule().newTurn()).
     }
 
     public void setPhase(TurnPhase phase) {

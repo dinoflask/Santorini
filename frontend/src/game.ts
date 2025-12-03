@@ -4,6 +4,7 @@ interface GameState {
   winner: null;
   turnPhase: null;
   godCards: string[];
+  canPassBuild: boolean; // NEW
 }
 
 interface Cell {

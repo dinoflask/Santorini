@@ -13,14 +13,15 @@ public class GameState {
     private final Player currentPlayer;
     private final TurnPhase turnPhase;
     private final GodCard[] availableGodCards;
+    private final boolean canPassBuild;
 
-    private GameState(Cell[] cells, int winner, Player player, TurnPhase turnPhase, GodCard[] availableGodCards) {
+    private GameState(Cell[] cells, int winner, Player player, TurnPhase turnPhase, GodCard[] availableGodCards, boolean canPassBuild) {
         this.cells = cells;
         this.winner = winner;
         this.currentPlayer = player;
         this.turnPhase = turnPhase;
         this.availableGodCards = availableGodCards;
-        
+        this.canPassBuild = canPassBuild;
     }
 
     public static GameState forGame(Game game) {
@@ -31,7 +32,14 @@ public class GameState {
 
         GodCard[] availableGodCards = GodCard.values(); 
 
-        return new GameState(cells, winner, player, turnPhase, availableGodCards);
+        boolean canPassBuild = false;
+        if (game.getPhase() == TurnPhase.BUILD) {
+            // You can compute this generically if your BuildRule exposes it,
+            // but as a first step: allow pass whenever we're in BUILD.
+            canPassBuild = true;
+        }
+
+        return new GameState(cells, winner, player, turnPhase, availableGodCards, canPassBuild);
     }
 
     public Cell[] getCells() {
@@ -53,14 +61,15 @@ public class GameState {
                     "currentPlayer": "%s",
                     "winner": %s,
                     "turnPhase": "%s",
-                    "godCards": %s
+                    "godCards": %s,
+                    "canPassBuild": %b
                     
                 }
                 """.formatted(
                 Arrays.toString(this.cells),
                 this.currentPlayer.getId(),
                 this.winner, this.turnPhase.name(),
-                godArray);
+                godArray, canPassBuild);
     }
 
     private static Cell[] getCells(Game game) {

@@ -74,7 +74,15 @@ public class App extends NanoHTTPD {
             } catch (Exception e) {
                 System.err.println("Choose error: " + e);
             }
+        } else if (uri.equals("/passBuild")) {
+            try {
+                game.passBuild(); // new method you’ll add below
+            } catch (Exception e) {
+            System.err.println("PassBuild error: " + e);
+            }
         }
+
+        
         
 
         // Your original response - UNCHANGED
