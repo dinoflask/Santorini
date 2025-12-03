@@ -65,7 +65,17 @@ public class App extends NanoHTTPD {
             } catch (Exception e) {
                 System.err.println("Play error: " + e);
             }
+        } else if (uri.equals("/choose")) {
+            try {
+                String godName = params.get("god"); // e.g. "DEMETER"
+
+                this.game.chooseGodForCurrentPlayer(godName);
+                System.out.println("Choose: " + godName);
+            } catch (Exception e) {
+                System.err.println("Choose error: " + e);
+            }
         }
+        
 
         // Your original response - UNCHANGED
         GameState gameplay = GameState.forGame(this.game);

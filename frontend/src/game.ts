@@ -2,6 +2,8 @@ interface GameState {
   cells: Cell[];
   currentPlayer: string;  
   winner: null;
+  turnPhase: null;
+  godCards: string[];
 }
 
 interface Cell {

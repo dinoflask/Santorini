@@ -16,6 +16,7 @@ public class Game {
     private int workersPlacedThisTurn = 0;
     private TurnPhase turnPhase = TurnPhase.PLACING;
     private Worker activeWorker = null; // currently selected worker
+    private boolean godPowersChosen = false;
 
     public Game(Player player1, Player player2) {
         this.size = 5;
@@ -28,6 +29,7 @@ public class Game {
         this.currentPlayerIndex = 0;
         this.winState = false;
         this.winnerPlayerIndex = -1;
+        this.turnPhase = TurnPhase.PLACING;
     }
 
     public TurnPhase getPhase() {
@@ -60,6 +62,7 @@ public class Game {
 
     public enum TurnPhase {
         PLACING, 
+        GOD_SELECTION,
         SELECTION,
         MOVE,
         BUILD
@@ -109,12 +112,20 @@ public class Game {
 
                 // If all 4 workers (2 per player) have been placed, move to SELECTION phase
                 if (totalWorkersPlaced == 4) {
-                    turnPhase = TurnPhase.SELECTION;
+                    turnPhase = TurnPhase.GOD_SELECTION;
                 } else {
                     // Otherwise continue placing for next player
                     switchTurn();
                 }
+
+                
                 break;
+
+            case GOD_SELECTION:
+                // Gods are already assigned in app,
+                // so we just advance to worker selection the first time this phase is hit.
+                break;
+                
 
             case SELECTION:
                 // Find if the current player has a worker at (x, y)
@@ -156,6 +167,29 @@ public class Game {
                 turnPhase = TurnPhase.SELECTION;
                 activeWorker = null;
                 break;
+        }
+    }
+
+    public void setPhase(TurnPhase phase) {
+        this.turnPhase = phase;
+    }
+    
+    public TurnPhase getTurnPhase() {
+        return this.turnPhase;
+    }
+
+    public void chooseGodForCurrentPlayer(String godName) {
+        GodCard card = GodCard.valueOf(godName); // throws if bad name
+        Player current = getCurrentPlayer();
+        
+        current.addGodCard(card);
+
+        boolean allChosen = getPlayers().stream()
+                .allMatch(p -> !p.getGodCards().isEmpty());
+        if (allChosen) {
+            setPhase(TurnPhase.SELECTION);
+        } else {
+            switchTurn();
         }
     }
 

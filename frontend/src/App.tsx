@@ -38,6 +38,8 @@ class App extends React.Component<Props, GameState> {
       cells: [],
       currentPlayer: "", // for example, tracking whose turn it is
       winner: null,
+      turnPhase: null,
+      godCards: [],
     };
   }
 
@@ -56,6 +58,8 @@ class App extends React.Component<Props, GameState> {
         cells: json["cells"],
         currentPlayer: json["currentPlayer"],
         winner: json["winner"],
+        turnPhase: json["turnPhase"],
+        godCards: json["godCards"] ?? [],
       });
     } catch (error) {
       console.error("New Game failed:", error);
@@ -78,6 +82,28 @@ class App extends React.Component<Props, GameState> {
       this.setState({ cells: json["cells"] });
       this.setState({ currentPlayer: json["currentPlayer"] });
       this.setState({ winner: json["winner"] });
+      this.setState({ turnPhase: json["turnPhase"] });
+    };
+  }
+
+  /**
+   * analogous to play—will generate an anonymous function that the component
+   * can bind with.
+   * @param x
+   * @param y
+   * @returns
+   */
+  chooseGod(god: string): React.MouseEventHandler {
+    return async (e) => {
+      e.preventDefault();
+      const response = await fetch(`http://localhost:8080/choose?god=${god}`);
+      const json = await response.json();
+      this.setState({
+        cells: json["cells"],
+        currentPlayer: json["currentPlayer"],
+        winner: json["winner"],
+        turnPhase: json["turnPhase"],
+      });
     };
   }
 
@@ -131,6 +157,9 @@ class App extends React.Component<Props, GameState> {
      * can treat HTML elements as code.
      * @see https://reactjs.org/docs/introducing-jsx.html
      */
+    if (this.state.turnPhase === "GOD_SELECTION") {
+      return this.renderGodSelection();
+    }
     let instructionsText = "";
     if (this.state.winner == -1) {
       instructionsText = `Current turn: ${this.state.currentPlayer}`;
@@ -155,6 +184,24 @@ class App extends React.Component<Props, GameState> {
       </div>
     );
   }
+  renderGodSelection(): React.ReactNode {
+    const gods = this.state.godCards; // comes from backend
+
+    return (
+      <div>
+        <h2>Choose your God power (Player {this.state.currentPlayer})</h2>
+        <div id="god-grid">
+          {gods.map((god) => (
+            <button key={god} onClick={this.chooseGod(god)}>
+              {god}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 }
 
+
 export default App;
+

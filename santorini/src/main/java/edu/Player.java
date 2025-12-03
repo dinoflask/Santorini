@@ -2,11 +2,13 @@ package edu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+
 
 public class Player {
     private final String id;
     private final List<Worker> workers;
-
+    private final List<GodCard> godCards = new ArrayList<>();
 
     public Player(String id) {
         this.id = id;
@@ -40,5 +42,30 @@ public class Player {
             }
         }
         throw new IllegalStateException("No available worker to place");
+    }
+    
+    // Return an unmodifiable view to avoid external mutation
+    public List<GodCard> getGodCards() {
+        return Collections.unmodifiableList(godCards);
+    }
+
+    // Replace entire list (useful if you ever assign multiple at once)
+    public void setGodCards(List<GodCard> cards) {
+        godCards.clear();
+        if (cards != null) {
+            godCards.addAll(cards);
+        }
+    }
+
+    // Convenience: add a single God card
+    public void addGodCard(GodCard card) {
+        if (card != null && !godCards.contains(card)) {
+            godCards.add(card);
+        }
+    }
+
+    // Convenience: check if player has a specific God
+    public boolean hasGodCard(GodCard card) {
+        return godCards.contains(card);
     }
 }

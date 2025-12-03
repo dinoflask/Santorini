@@ -1,34 +1,42 @@
 package edu;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import edu.Buildings.BuildType;
+import edu.Game.TurnPhase;
 
 public class GameState {
 
     private final Cell[] cells;
     private final int winner;
     private final Player currentPlayer;
+    private final TurnPhase turnPhase;
+    private final GodCard[] availableGodCards;
 
-    private GameState(Cell[] cells, int winner, Player player) {
+    private GameState(Cell[] cells, int winner, Player player, TurnPhase turnPhase, GodCard[] availableGodCards) {
         this.cells = cells;
         this.winner = winner;
         this.currentPlayer = player;
+        this.turnPhase = turnPhase;
+        this.availableGodCards = availableGodCards;
+        
     }
 
     public static GameState forGame(Game game) {
         Cell[] cells = getCells(game);
         Player player = game.getCurrentPlayer();
         int winner = game.getWinnerPlayerIndex();
+        TurnPhase turnPhase = game.getPhase();
 
-        return new GameState(cells, winner, player);
+        GodCard[] availableGodCards = GodCard.values(); 
+
+        return new GameState(cells, winner, player, turnPhase, availableGodCards);
     }
 
     public Cell[] getCells() {
         return this.cells;
     }
-
-    
 
     /**
      * toString() of GameState will return the string representing
@@ -36,16 +44,23 @@ public class GameState {
      */
     @Override
     public String toString() {
+        String godArray = Arrays.stream(availableGodCards)
+                .map(g -> "\"" + g.name() + "\"") // adds quotes to make valid json
+                .collect(Collectors.joining(", ", "[", "]"));
         return """
                 {
                     "cells": %s,
                     "currentPlayer": "%s",
-                    "winner": %s 
+                    "winner": %s,
+                    "turnPhase": "%s",
+                    "godCards": %s
+                    
                 }
                 """.formatted(
                 Arrays.toString(this.cells),
                 this.currentPlayer.getId(),
-                this.winner);
+                this.winner, this.turnPhase.name(),
+                godArray);
     }
 
     private static Cell[] getCells(Game game) {
@@ -97,6 +112,11 @@ public class GameState {
                     case PLACING:
                         // playable if space not occupied
                         playable = (workerHere == null && !space.getTower().hasDome());
+                        break;
+
+                    case GOD_SELECTION:
+                        // playable if space not occupied
+                        playable = false;
                         break;
 
                     case SELECTION:
