@@ -1,0 +1,21 @@
+Why Strategy Pattern fits God Cards
+I began with a fixed turn pipeline (SELECT → MOVE → BUILD). 
+Since each God card modifies how a step behaves (extra builds, different move legality, etc.), not the overall existence of those steps,
+it matches the pattern of “varying the algorithm behind an operation,” which is Strategy.​
+
+For example, I defined small strategy interfaces for the parts that vary:
+
+MoveRule 
+BuildRule
+
+Each God card provides its own implementations of those interfaces.
+Then, Game.takeTurn simply delegates to the current player’s MoveRule / BuildRule instead of hard‑coding the rules.
+
+
+
+Why not Template Method / others?
+Template Method: works when all variants are subclasses of a single algorithm class and you don’t swap them per player at runtime. Santorini needs per‑player, pluggable behavior, so Strategy (composition) is a better fit than inheritance here.​
+
+Decorator: good in addition to Strategy when stacking multiple powers, but slightly overkill if you start with one power per player.
+
+Composite / Builder: more about object structure/creation, less about swapping gameplay rules.

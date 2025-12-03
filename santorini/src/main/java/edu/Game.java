@@ -138,35 +138,48 @@ public class Game {
                 break;
 
             case MOVE:
-                if (!target.canMoveTo(activeWorker.getSpace())) {
+                MoveRule moveRule = getCurrentPlayer().getMoveRule();
+
+                if (!moveRule.canMove(activeWorker, target)) {
                     throw new IllegalArgumentException("Invalid move");
                 }
-                activeWorker.moveTo(target);
+
+                boolean canMoveAgain = moveRule.performMove(activeWorker, target);
 
                 if (target.getTower().getLevel() == 3) {
                     winState = true;
                     winnerPlayerIndex = currentPlayerIndex;
                     return;
                 }
-                
-                turnPhase = TurnPhase.BUILD;
+
+                if (canMoveAgain) {
+                    // Stay in MOVE phase; gods like Artemis could use this
+                    turnPhase = TurnPhase.MOVE;
+                } else {
+                    turnPhase = TurnPhase.BUILD;
+                }
                 break;
 
             case BUILD:
-                // Determine build type by current tower level
-                BuildType buildType = (target.getTower().getLevel() == 3) ? BuildType.DOME : BuildType.BLOCK;
+    BuildRule buildRule = getCurrentPlayer().getBuildRule();
 
-                if (!target.canBuildOn(activeWorker.getSpace(), buildType)) {
-                    throw new IllegalArgumentException("Invalid build");
-                }
+    if (!buildRule.canBuild(activeWorker, target)) {
+        throw new IllegalArgumentException("Invalid build");
+    }
 
-                activeWorker.buildOn(target, buildType);
+    boolean canBuildAgain = buildRule.performBuild(activeWorker, target);
 
-                // Reset for next turn
-                switchTurn();
-                turnPhase = TurnPhase.SELECTION;
-                activeWorker = null;
-                break;
+    if (canBuildAgain) {
+        // Stay in BUILD phase; strategy tracks where first build happened
+        turnPhase = TurnPhase.BUILD;
+    } else {
+        switchTurn();
+        turnPhase = TurnPhase.SELECTION;
+        activeWorker = null;
+    }
+    break;
+
+
         }
     }
 
@@ -179,10 +192,19 @@ public class Game {
     }
 
     public void chooseGodForCurrentPlayer(String godName) {
-        GodCard card = GodCard.valueOf(godName); // throws if bad name
+        GodCard card = GodCard.valueOf(godName);
         Player current = getCurrentPlayer();
-        
+
         current.addGodCard(card);
+
+        switch (card) {
+            case DEMETER -> {
+                // Wrap existing rule so Demeter adds its power on top
+                BuildRule base = current.getBuildRule();
+                current.setBuildRule(new DemeterBuildRule(base));
+            }
+            // other gods later...
+        }
 
         boolean allChosen = getPlayers().stream()
                 .allMatch(p -> !p.getGodCards().isEmpty());

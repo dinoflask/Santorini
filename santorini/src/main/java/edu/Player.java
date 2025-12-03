@@ -9,6 +9,8 @@ public class Player {
     private final String id;
     private final List<Worker> workers;
     private final List<GodCard> godCards = new ArrayList<>();
+    private MoveRule moveRule = new StandardMoveRule();
+    private BuildRule buildRule = new StandardBuildRule();
 
     public Player(String id) {
         this.id = id;
@@ -68,4 +70,21 @@ public class Player {
     public boolean hasGodCard(GodCard card) {
         return godCards.contains(card);
     }
+    
+    public MoveRule getMoveRule() {
+        return moveRule;
+    }
+
+    public void setMoveRule(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
+
+    public BuildRule getBuildRule() {
+        return buildRule;
+    }
+
+    public void setBuildRule(BuildRule buildRule) {
+        this.buildRule = buildRule;
+    }
+
 }
