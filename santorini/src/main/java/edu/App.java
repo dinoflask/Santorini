@@ -83,8 +83,7 @@ public class App extends NanoHTTPD {
         }
 
         
-        
-
+    
         // Your original response - UNCHANGED
         GameState gameplay = GameState.forGame(this.game);
         System.out.println("Sending cells: " + gameplay.toString());

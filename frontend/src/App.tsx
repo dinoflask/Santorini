@@ -180,39 +180,58 @@ class App extends React.Component<Props, GameState> {
     }
 
     return (
-      <div>
-        <div id="board">
-          {this.state.cells.map((cell, i) => this.createCell(cell, i))}
-        </div>
+      <div id="app-container">
+        <header id="app-header">Santorini</header>
+        {/* Winner popup stays fixed */}
+        {this.state.winner != -1 && (
+          <div id="winner-popup">
+            <div id="winner-message">
+              Winner: {this.state.winner === 0 ? "A" : "B"}
+            </div>
+          </div>
+        )}
 
-        <div id="instructions">{instructionsText}</div>
-        <div id="bottombar">
-          <button onClick={this.newGame}>New Game</button>
-
-          {this.state.turnPhase === "BUILD" && this.state.canPassBuild && (
-            <button onClick={this.passBuild}>Skip extra build</button>
-          )}
+        {/* Main game UI - centered and scaled */}
+        <div id="game-ui">
+          <div id="board">
+            {this.state.cells.map((cell, i) => this.createCell(cell, i))}
+          </div>
+          <div id="instructions">{instructionsText}</div>
+          <div id="bottombar">
+            <button onClick={this.newGame}>New Game</button>
+            {this.state.turnPhase === "BUILD" && this.state.canPassBuild && (
+              <button onClick={this.passBuild}>Skip extra build</button>
+            )}
+          </div>
         </div>
       </div>
     );
-
   }
   renderGodSelection(): React.ReactNode {
-    const gods = this.state.godCards; // comes from backend
-
+    const gods = this.state.godCards;
     return (
-      <div>
-        <h2>Choose your God power (Player {this.state.currentPlayer})</h2>
-        <div id="god-grid">
-          {gods.map((god) => (
-            <button key={god} onClick={this.chooseGod(god)}>
-              {god}
-            </button>
-          ))}
+      <div
+        id="god-popup"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="god-popup-title"
+      >
+        <div id="god-popup-content">
+          <h2 id="god-popup-title">
+            Choose your God power (Player {this.state.currentPlayer})
+          </h2>
+          <div id="god-grid">
+            {gods.map((god) => (
+              <button key={god} onClick={this.chooseGod(god)}>
+                {god}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
+
   passBuild: React.MouseEventHandler = async (e) => {
     e.preventDefault();
     const response = await fetch("http://localhost:8080/passBuild");

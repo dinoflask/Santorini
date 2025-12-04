@@ -1,49 +1,177 @@
+/* Full viewport container */
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 1.7rem;
+  /* No scrolling */
+}
+
+#app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Game UI container - scaled down */
+#game-ui {
+  max-width: 900px;
+  /* wider max width */
+  margin: 1rem auto;
+  text-align: center;
+}
+
+/* Make board even larger */
 #board {
+  max-width: 50vw;
+  /* 95% of viewport width */
+  width: 50vmin;
+  /* OR 95% of smallest viewport dimension */
+  margin: 0.5rem auto 0.5rem auto;
+  aspect-ratio: 1 / 1;
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  /* Larger gaps too */
   background-color: #2196F3;
-  padding: 10px;
+  padding: 16px;
+  /* More padding */
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
-.cell {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  padding: 20px;
-  font-size: 30px;
-  height: 25vmin;
-  text-align: center;
-}
-
+/* Smaller instructions and bottombar */
+#instructions,
 #bottombar {
-  height: 5vh;
+  max-width: 50vw;
+  margin: 0 auto 0.5rem auto;
+  width: auto;
+  height: 3rem;
+  line-height: 3rem;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-#instructions {
-  height: 5vh;
-  background-color: white;
-  padding: 0px;
-  margin: 0px;
-  text-align: center;
-  border: 1px solid black;
+/* Bottombar button layout */
+#bottombar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
 #bottombar button {
-  width: 50%;
-  /* height: 100%; */
-  margin: 0;
-  padding: 0;
-  position: relative;
-  float: left;
-  font-size: 2vw
-}
-
-html,
-body {
+  flex: 1;
   height: 100%;
-  margin: 0;
-  padding: 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+#bottombar button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.playable {
-  background-color: red;
+/* Winner popup unchanged */
+#winner-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#winner-message {
+  background: linear-gradient(135deg, #ff6b6b, #feca57);
+  padding: 3rem 4rem;
+  font-size: 4rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+#god-popup {
+  position: fixed;
+  inset: 0;
+  /* shorthand for top:0; right:0; bottom:0; left:0; */
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+#god-popup-content {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: center;
+}
+
+#god-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#god-grid button {
+  padding: 0.75rem 1rem;
+  font-size: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: 2px solid #2196F3;
+  background: #e3f2fd;
+}
+
+#god-grid button:hover {
+  background: #bbdefb;
+}
+
+#app-header {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  margin: 0.5rem auto 0.1rem auto;
+  text-align: center;
+  user-select: none;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  font-family: 'Georgia', serif;
 }

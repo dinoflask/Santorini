@@ -86,7 +86,7 @@ public class GameState {
                 // Compose building text based on level and dome with nested brackets
                 int level = space.getTower().getLevel();
                 if (level == 0) {
-                    text = null;
+                    text = "O";
                 } else if (level == 1) {
                     text = "[]";
                 } else if (level == 2) {
@@ -102,7 +102,7 @@ public class GameState {
 
                 if (workerHere != null) {
                     String playerId = workerHere.getOwner().getId();
-                    if (text == null) {
+                    if (text == "O") {
                         // No building, so just show worker as [A], [B], etc.
                         text = "[" + playerId + "]";
                     } else {

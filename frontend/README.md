@@ -16,9 +16,10 @@ npm start
 
 Santorini will now start.
 
-Tower Meaning:
-[]    [[]]   [[[]]] [[[O]]]
-lvl1  lvl2   lvl3   lvl3 with dome
+
+Space / Tower Meaning:
+O      []    [[]]   [[[]]] [[[O]]]
+empty  lvl1  lvl2   lvl3   lvl3 with dome
 
 
 
