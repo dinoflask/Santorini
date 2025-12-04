@@ -52,6 +52,10 @@ public class Game {
         return players.get(currentPlayerIndex);
     }
 
+    public boolean isWinState() {
+        return winState;
+    }
+
     public int getWinnerPlayerIndex() {
         return winnerPlayerIndex;
     }
@@ -70,6 +74,12 @@ public class Game {
 
     // Main game action: take a turn with move and build
     public void takeTurn(int x, int y) {
+
+        if (winState) {
+            // Game over, ignore further turns
+            return;
+        }
+
         Space target = board.getSpace(x, y);
 
         switch (turnPhase) {

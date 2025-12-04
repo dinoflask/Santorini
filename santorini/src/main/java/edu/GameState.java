@@ -2,8 +2,6 @@ package edu;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
-
-import edu.Buildings.BuildType;
 import edu.Game.TurnPhase;
 
 public class GameState {
@@ -71,6 +69,9 @@ public class GameState {
     }
 
     private static Cell[] getCells(Game game) {
+
+        boolean gameOver = game.isWinState();
+        
         Cell cells[] = new Cell[25];
         Board board = game.getBoard();
         for (int x = 0; x <= 4; x++) {
@@ -114,40 +115,37 @@ public class GameState {
                         }
                     }
                 }
-                // Implement playable logic based on game phase and active worker
-                switch (game.getPhase()) {
-                    case PLACING:
-                        // playable if space not occupied
-                        playable = (workerHere == null && !space.getTower().hasDome());
-                        break;
+                if (gameOver) {
+                    playable = false;
+                } else {
+                    // Implement playable logic based on game phase and active worker
+                    switch (game.getPhase()) {
+                        case PLACING:
+                            playable = (workerHere == null && !space.getTower().hasDome());
+                            break;
+                        case GOD_SELECTION:
+                            playable = false;
+                            break;
+                        case SELECTION:
+                            playable = (workerHere != null && workerHere.getOwner() == game.getCurrentPlayer());
+                            break;
+                        case MOVE:
+                            if (game.getActiveWorker() != null) {
+                                MoveRule moveRule = game.getCurrentPlayer().getMoveRule();
+                                playable = moveRule.isLegalMoveTarget(game.getActiveWorker(), space);
+                            }
+                            break;
+                        case BUILD:
+                            if (game.getActiveWorker() != null) {
+                                BuildRule buildRule = game.getCurrentPlayer().getBuildRule();
+                                playable = buildRule.isLegalBuildTarget(game.getActiveWorker(), space);
+                            }
+                            break;
+                        default:
+                            playable = false;
+                    }
+                } // ← This closes the 'else' block
 
-                    case GOD_SELECTION:
-                        // playable if space not occupied
-                        playable = false;
-                        break;
-
-                    case SELECTION:
-                        // playable if occupied by current player's worker
-                        playable = (workerHere != null && workerHere.getOwner() == game.getCurrentPlayer());
-                        break;
-
-                    case MOVE:
-                        if (game.getActiveWorker() != null) {
-                            MoveRule moveRule = game.getCurrentPlayer().getMoveRule();
-                            playable = moveRule.isLegalMoveTarget(game.getActiveWorker(), space);
-                        }
-                        break;
-
-                    case BUILD:
-                        if (game.getActiveWorker() != null) {
-                            BuildRule buildRule = game.getCurrentPlayer().getBuildRule();
-                            playable = buildRule.isLegalBuildTarget(game.getActiveWorker(), space);
-                        }
-                        break;
-
-                    default:
-                        playable = false;
-                }
                 //text: needs to be null, [], [[]], [[[]]], or [[[O]]] if there's no people on it, and
                 // [A], [[B]], [[[A]]] if there's workers from A or B on it
 
