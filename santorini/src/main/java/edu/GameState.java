@@ -29,14 +29,12 @@ public class GameState {
         Player player = game.getCurrentPlayer();
         int winner = game.getWinnerPlayerIndex();
         TurnPhase turnPhase = game.getPhase();
-
         GodCard[] availableGodCards = GodCard.values(); 
 
         boolean canPassBuild = false;
         if (game.getPhase() == TurnPhase.BUILD) {
-            // You can compute this generically if your BuildRule exposes it,
-            // but as a first step: allow pass whenever we're in BUILD.
-            canPassBuild = true;
+            BuildRule rule = game.getCurrentPlayer().getBuildRule();
+            canPassBuild = rule.canSkipExtraBuild();
         }
 
         return new GameState(cells, winner, player, turnPhase, availableGodCards, canPassBuild);
@@ -134,17 +132,16 @@ public class GameState {
                         break;
 
                     case MOVE:
-                        // playable if active worker can move here
                         if (game.getActiveWorker() != null) {
-                            playable = space.canMoveTo(game.getActiveWorker().getSpace());
+                            MoveRule moveRule = game.getCurrentPlayer().getMoveRule();
+                            playable = moveRule.isLegalMoveTarget(game.getActiveWorker(), space);
                         }
                         break;
 
                     case BUILD:
-                        // playable if active worker can build here
                         if (game.getActiveWorker() != null) {
-                            BuildType buildType = (level == 3) ? BuildType.DOME : BuildType.BLOCK;
-                            playable = space.canBuildOn(game.getActiveWorker().getSpace(), buildType);
+                            BuildRule buildRule = game.getCurrentPlayer().getBuildRule();
+                            playable = buildRule.isLegalBuildTarget(game.getActiveWorker(), space);
                         }
                         break;
 

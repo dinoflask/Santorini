@@ -2,26 +2,30 @@ package edu;
 
 import edu.Buildings.BuildType;
 
-public class DemeterBuildRule implements BuildRule {
+public class HephaestusBuildRule implements BuildRule {
 
     private final BuildRule base;
     private Space firstBuildSpace = null;
     private boolean usedSecondBuild = false;
 
-    public DemeterBuildRule(BuildRule base) {
+    public HephaestusBuildRule(BuildRule base) {
         this.base = base;
     }
 
     @Override
     public boolean canBuild(Worker worker, Space target) {
-        // First, respect the base rule
         if (!base.canBuild(worker, target)) {
             return false;
         }
 
-        // If this would be the optional second build, forbid same space
+        // Hephaestus rule: second build ONLY on the first build space, and only BLOCK
+        // (not dome)
         if (firstBuildSpace != null && !usedSecondBuild) {
-            return target != firstBuildSpace;
+            if (target != firstBuildSpace) {
+                return false; // Must be same space as first build
+            }
+            // Must be BLOCK (level < 3), not dome
+            return target.getTower().getLevel() < 3;
         }
 
         return true;
@@ -30,28 +34,24 @@ public class DemeterBuildRule implements BuildRule {
     @Override
     public boolean performBuild(Worker worker, Space target) {
         if (firstBuildSpace == null) {
-            // First build of the turn
+            // First build - record location
             base.performBuild(worker, target);
             firstBuildSpace = target;
             usedSecondBuild = false;
-            // Allow an optional second build
-            return true;
+            return true; // Allow optional second build on same space
         } else if (!usedSecondBuild) {
-            // Second build (must be on different space due to canBuild)
+            // Second build: must be BLOCK on first space (enforced by canBuild)
             base.performBuild(worker, target);
             usedSecondBuild = true;
-            // No further builds this turn
             reset();
             return false;
-        } else {
-            // Should not be reached if game respects canBuild/return flags
-            return false;
         }
+        return false;
     }
 
     @Override
     public boolean canSkipExtraBuild() {
-        return firstBuildSpace != null; // true after first build, false before
+        return firstBuildSpace != null; // Same as Demeter
     }
 
     private void reset() {

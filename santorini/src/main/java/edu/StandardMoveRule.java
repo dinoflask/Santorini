@@ -13,4 +13,14 @@ public class StandardMoveRule implements MoveRule {
         // Standard rule: only one move per turn
         return false;
     }
+    
+    @Override
+    public boolean canSkipExtraMove() {
+        return false;
+    }
+
+    @Override
+    public boolean isLegalMoveTarget(Worker worker, Space target) {
+        return target.canMoveTo(worker.getSpace());
+    }
 }

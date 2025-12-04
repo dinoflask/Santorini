@@ -13,4 +13,8 @@ public interface MoveRule {
      * extra moves).
      */
     boolean performMove(Worker worker, Space target);
+    
+    boolean canSkipExtraMove(); 
+    
+    boolean isLegalMoveTarget(Worker worker, Space target);
 }

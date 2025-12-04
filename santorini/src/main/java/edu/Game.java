@@ -211,7 +211,14 @@ public class Game {
                 BuildRule base = current.getBuildRule();
                 current.setBuildRule(new DemeterBuildRule(base));
             }
-            // other gods later...
+            case HEPHAESTUS -> {
+                BuildRule base = current.getBuildRule();
+                current.setBuildRule(new HephaestusBuildRule(base));
+            }
+            case MINOTAUR -> {
+                MoveRule base = current.getMoveRule();
+                current.setMoveRule(new MinotaurMoveRule(base));
+            }
         }
 
         boolean allChosen = getPlayers().stream()

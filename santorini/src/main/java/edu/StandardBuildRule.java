@@ -20,4 +20,15 @@ public class StandardBuildRule implements BuildRule {
         // Standard rule: only one build per turn
         return false;
     }
+    
+    @Override
+    public boolean canSkipExtraBuild() {
+        return false;
+    }
+    
+    @Override
+    public boolean isLegalBuildTarget(Worker worker, Space target) {
+        return canBuild(worker, target);
+    }
+
 }
