@@ -17,4 +17,7 @@ public interface MoveRule {
     boolean canSkipExtraMove(); 
     
     boolean isLegalMoveTarget(Worker worker, Space target);
+
+    boolean isWinningMove(Worker worker, Space oldSpace, Space newSpace);
+
 }

@@ -23,4 +23,10 @@ public class StandardMoveRule implements MoveRule {
     public boolean isLegalMoveTarget(Worker worker, Space target) {
         return target.canMoveTo(worker.getSpace());
     }
+
+    @Override
+    public boolean isWinningMove(Worker worker, Space from, Space to) {
+        return to.getTower().getLevel() == 3;
+    }
+
 }

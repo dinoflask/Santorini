@@ -78,5 +78,10 @@ public class MinotaurMoveRule implements MoveRule {
         return canMove(worker, target);
     }
 
+    @Override
+    public boolean isWinningMove(Worker worker, Space from, Space to) {
+        return to.getTower().getLevel() == 3;
+    }
+
 }
 

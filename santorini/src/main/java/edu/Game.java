@@ -139,21 +139,21 @@ public class Game {
 
             case MOVE:
                 MoveRule moveRule = getCurrentPlayer().getMoveRule();
-
                 if (!moveRule.canMove(activeWorker, target)) {
                     throw new IllegalArgumentException("Invalid move");
                 }
 
+                Space oldSpace = activeWorker.getSpace();
                 boolean canMoveAgain = moveRule.performMove(activeWorker, target);
 
-                if (target.getTower().getLevel() == 3) {
+                // Delegate win check to MoveRule
+                if (moveRule.isWinningMove(activeWorker, oldSpace, target)) {
                     winState = true;
                     winnerPlayerIndex = currentPlayerIndex;
                     return;
                 }
 
                 if (canMoveAgain) {
-                    // Stay in MOVE phase; gods like Artemis could use this
                     turnPhase = TurnPhase.MOVE;
                 } else {
                     turnPhase = TurnPhase.BUILD;
@@ -219,6 +219,11 @@ public class Game {
                 MoveRule base = current.getMoveRule();
                 current.setMoveRule(new MinotaurMoveRule(base));
             }
+            case PAN -> {
+                MoveRule base = current.getMoveRule();
+                current.setMoveRule(new PanMoveRule(base));
+            }
+
         }
 
         boolean allChosen = getPlayers().stream()
