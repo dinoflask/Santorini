@@ -20,4 +20,6 @@ public interface MoveRule {
 
     boolean isWinningMove(Worker worker, Space oldSpace, Space newSpace);
 
+    default void newTurn() {
+    } // Default no-op
 }

@@ -8,32 +8,21 @@ import BoardCell from "./Cell.tsx";
  */
 interface Props {}
 
-/**
- * Using generics to specify the type of props and state.
- * props and state is a special field in a React component.
- * React will keep track of the value of props and state.
- * Any time there's a change to their values, React will
- * automatically update (not fully re-render) the HTML needed.
- *
- * props and state are similar in the sense that they manage
- * the data of this component. A change to their values will
- * cause the view (HTML) to change accordingly.
- *
- * Usually, props is passed and changed by the parent component;
- * state is the internal value of the component and managed by
- * the component itself.
- */
-class App extends React.Component<Props, GameState> {
+interface AppState {
+  cells: Cell[];
+  currentPlayer: string;
+  winner: number | null;
+  turnPhase: string | null;
+  godCards: string[];
+  canPassBuild: boolean;
+  canPassMove: boolean; // NEW
+}
+
+class App extends React.Component<Props, AppState> {
   private initialized: boolean = false;
 
-  /**
-   * @param props has type Props
-   */
   constructor(props: Props) {
     super(props);
-    /**
-     * state has type GameState as specified in the class inheritance.
-     */
     this.state = {
       cells: [],
       currentPlayer: "", // for example, tracking whose turn it is
@@ -41,14 +30,10 @@ class App extends React.Component<Props, GameState> {
       turnPhase: null,
       godCards: [],
       canPassBuild: false,
+      canPassMove: false, // NEW
     };
   }
 
-  /**
-   * Use arrow function, i.e., () => {} to create an async function,
-   * otherwise, 'this' would become undefined in runtime. This is
-   * just an issue of Javascript.
-   */
   newGame = async () => {
     try {
       const response = await fetch("http://localhost:8080/newgame");
@@ -62,22 +47,15 @@ class App extends React.Component<Props, GameState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
+        canPassMove: json["canPassMove"] ?? false, // NEW
       });
     } catch (error) {
       console.error("New Game failed:", error);
     }
   };
 
-  /**
-   * play will generate an anonymous function that the component
-   * can bind with.
-   * @param x
-   * @param y
-   * @returns
-   */
-  play(x: number, y: number): React.MouseEventHandler {
+  play = (x: number, y: number): React.MouseEventHandler => {
     return async (e) => {
-      // prevent the default behavior on clicking a link; otherwise, it will jump to a new page.
       e.preventDefault();
       const response = await fetch(`http://localhost:8080/play?x=${x}&y=${y}`);
       const json = await response.json();
@@ -88,18 +66,12 @@ class App extends React.Component<Props, GameState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
+        canPassMove: json["canPassMove"] ?? false, // NEW
       });
     };
-  }
+  };
 
-  /**
-   * analogous to play—will generate an anonymous function that the component
-   * can bind with.
-   * @param x
-   * @param y
-   * @returns
-   */
-  chooseGod(god: string): React.MouseEventHandler {
+  chooseGod = (god: string): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
       const response = await fetch(`http://localhost:8080/choose?god=${god}`);
@@ -111,18 +83,13 @@ class App extends React.Component<Props, GameState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
+        canPassMove: json["canPassMove"] ?? false, // NEW
       });
     };
-  }
+  };
 
   createCell(cell: Cell, index: number): React.ReactNode {
     if (cell.playable)
-      /**
-       * key is used for React when given a list of items. It
-       * helps React to keep track of the list items and decide
-       * which list item need to be updated.
-       * @see https://reactjs.org/docs/lists-and-keys.html#keys
-       */
       return (
         <div key={index}>
           <a href="/" onClick={this.play(cell.x, cell.y)}>
@@ -138,33 +105,14 @@ class App extends React.Component<Props, GameState> {
       );
   }
 
-  /**
-   * This function will call after the HTML is rendered.
-   * We update the initial state by creating a new game.
-   * @see https://reactjs.org/docs/react-component.html#componentdidmount
-   */
   componentDidMount(): void {
-    /**
-     * setState in DidMount() will cause it to render twice which may cause
-     * this function to be invoked twice. Use initialized to avoid that.
-     */
     if (!this.initialized) {
       this.newGame();
       this.initialized = true;
     }
   }
 
-  /**
-   * The only method you must define in a React.Component subclass.
-   * @returns the React element via JSX.
-   * @see https://reactjs.org/docs/react-component.html
-   */
   render(): React.ReactNode {
-    /**
-     * We use JSX to define the template. An advantage of JSX is that you
-     * can treat HTML elements as code.
-     * @see https://reactjs.org/docs/introducing-jsx.html
-     */
     if (this.state.turnPhase === "GOD_SELECTION") {
       return this.renderGodSelection();
     }
@@ -202,11 +150,15 @@ class App extends React.Component<Props, GameState> {
             {this.state.turnPhase === "BUILD" && this.state.canPassBuild && (
               <button onClick={this.passBuild}>Skip extra build</button>
             )}
+            {this.state.turnPhase === "MOVE" && this.state.canPassMove && (
+              <button onClick={this.passMove}>Pass Move</button>
+            )}
           </div>
         </div>
       </div>
     );
   }
+
   renderGodSelection(): React.ReactNode {
     const gods = this.state.godCards;
     return (
@@ -243,10 +195,24 @@ class App extends React.Component<Props, GameState> {
       turnPhase: json["turnPhase"],
       godCards: json["godCards"] ?? [],
       canPassBuild: json["canPassBuild"] ?? false,
+      canPassMove: json["canPassMove"] ?? false, // NEW
+    });
+  };
+
+  passMove: React.MouseEventHandler = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:8080/passMove");
+    const json = await response.json();
+    this.setState({
+      cells: json["cells"],
+      currentPlayer: json["currentPlayer"],
+      winner: json["winner"],
+      turnPhase: json["turnPhase"],
+      godCards: json["godCards"] ?? [],
+      canPassBuild: json["canPassBuild"] ?? false,
+      canPassMove: json["canPassMove"] ?? false, // NEW
     });
   };
 }
 
-
 export default App;
-

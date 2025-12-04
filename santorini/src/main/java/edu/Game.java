@@ -201,6 +201,17 @@ public class Game {
         // you can later add a hook here (e.g. currentPlayer.getBuildRule().newTurn()).
     }
 
+    public void passMove() {
+        // Reset move rule state
+        getCurrentPlayer().getMoveRule().newTurn();
+
+        // CRITICAL: Change phase from MOVE to BUILD
+        turnPhase = TurnPhase.BUILD;
+
+        // Update GameState to reflect new phase
+        // Frontend will now see turnPhase = "BUILD"
+    }
+
     public void setPhase(TurnPhase phase) {
         this.turnPhase = phase;
     }
@@ -216,6 +227,9 @@ public class Game {
         current.addGodCard(card);
 
         switch (card) {
+            case STANDARD -> {
+                // No special rules - keep default rules
+            }
             case DEMETER -> {
                 // Wrap existing rule so Demeter adds its power on top
                 BuildRule base = current.getBuildRule();
@@ -236,6 +250,10 @@ public class Game {
             case APOLLO -> {
                 MoveRule base = current.getMoveRule();
                 current.setMoveRule(new ApolloMoveRule(base));
+            }
+            case ARTEMIS -> {
+                MoveRule base = current.getMoveRule();
+                current.setMoveRule(new ArtemisMoveRule(base));
             }
 
         }

@@ -12,14 +12,17 @@ public class GameState {
     private final TurnPhase turnPhase;
     private final GodCard[] availableGodCards;
     private final boolean canPassBuild;
+    private final boolean canPassMove;
 
-    private GameState(Cell[] cells, int winner, Player player, TurnPhase turnPhase, GodCard[] availableGodCards, boolean canPassBuild) {
+    private GameState(Cell[] cells, int winner, Player player, TurnPhase turnPhase, GodCard[] availableGodCards, boolean canPassBuild, 
+            boolean canPassMove) {
         this.cells = cells;
         this.winner = winner;
         this.currentPlayer = player;
         this.turnPhase = turnPhase;
         this.availableGodCards = availableGodCards;
         this.canPassBuild = canPassBuild;
+        this.canPassMove = canPassMove;
     }
 
     public static GameState forGame(Game game) {
@@ -30,12 +33,16 @@ public class GameState {
         GodCard[] availableGodCards = GodCard.values(); 
 
         boolean canPassBuild = false;
-        if (game.getPhase() == TurnPhase.BUILD) {
-            BuildRule rule = game.getCurrentPlayer().getBuildRule();
-            canPassBuild = rule.canSkipExtraBuild();
+        boolean canPassMove = false;
+        if (turnPhase == TurnPhase.BUILD) {
+            BuildRule buildRule = player.getBuildRule();
+            canPassBuild = buildRule.canSkipExtraBuild();
+        } else if (turnPhase == TurnPhase.MOVE) {
+            MoveRule moveRule = player.getMoveRule();
+            canPassMove = moveRule.canSkipExtraMove(); // Now fully encapsulated
         }
 
-        return new GameState(cells, winner, player, turnPhase, availableGodCards, canPassBuild);
+        return new GameState(cells, winner, player, turnPhase, availableGodCards, canPassBuild, canPassMove);
     }
 
     public Cell[] getCells() {
@@ -58,14 +65,15 @@ public class GameState {
                     "winner": %s,
                     "turnPhase": "%s",
                     "godCards": %s,
-                    "canPassBuild": %b
+                    "canPassBuild": %b,
+                    "canPassMove": %b
                     
                 }
                 """.formatted(
                 Arrays.toString(this.cells),
                 this.currentPlayer.getId(),
                 this.winner, this.turnPhase.name(),
-                godArray, canPassBuild);
+                godArray, canPassBuild, canPassMove);
     }
 
     private static Cell[] getCells(Game game) {
