@@ -233,6 +233,10 @@ public class Game {
                 MoveRule base = current.getMoveRule();
                 current.setMoveRule(new PanMoveRule(base));
             }
+            case APOLLO -> {
+                MoveRule base = current.getMoveRule();
+                current.setMoveRule(new ApolloMoveRule(base));
+            }
 
         }
 

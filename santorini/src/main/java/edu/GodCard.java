@@ -4,5 +4,6 @@ public enum GodCard {
     DEMETER,
     HEPHAESTUS,
     MINOTAUR,
-    PAN
+    PAN,
+    APOLLO
 }

@@ -19,6 +19,10 @@ public class Worker {
         return space;
     }
 
+    public void setSpace(Space space) {
+        this.space = space;
+    }
+
     public boolean canPlaceTo(Space target) {
         return !target.isOccupiedBy() && !target.getTower().hasDome();
     }
