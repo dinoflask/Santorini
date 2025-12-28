@@ -251,11 +251,7 @@ public class Game {
                 MoveRule base = current.getMoveRule();
                 current.setMoveRule(new ApolloMoveRule(base));
             }
-            case ARTEMIS -> {
-                MoveRule base = current.getMoveRule();
-                current.setMoveRule(new ArtemisMoveRule(base));
-            }
-
+            
         }
 
         boolean allChosen = getPlayers().stream()
