@@ -152,8 +152,9 @@ body {
 }
 
 #god-grid button {
-  padding: 0.75rem 1rem;
-  font-size: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.2;
+  font-size: 0.7rem;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s ease;
