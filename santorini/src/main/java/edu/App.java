@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
-
 public class App extends NanoHTTPD {
 
     public static void main(String[] args) {
@@ -12,6 +11,7 @@ public class App extends NanoHTTPD {
             new App();
         } catch (IOException ioe) {
             System.err.println("Couldn't start server:\n" + ioe);
+            System.exit(1); // Ensure clean exit on startup failure
         }
     }
 
@@ -20,17 +20,23 @@ public class App extends NanoHTTPD {
     private Player playerB = new Player("B");
 
     /**
-     * Start the server at :8080 port.
+     * Start the server on Render's $PORT (or 8080 locally).
      * 
      * @throws IOException
      */
     public App() throws IOException {
-        super(8080);
+        // Fix for Render: use $PORT env var, fallback to 8080 for local dev
+        String portStr = System.getenv("PORT");
+        int port = (portStr != null && !portStr.isEmpty()) ? Integer.parseInt(portStr) : 8080;
+
+        super(port);
+
+        System.out.println("Starting server on port " + port); // RENDER LOG CONFIRMATION
 
         this.game = new Game(playerA, playerB);
 
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        System.out.println("\nRunning!\n");
+        System.out.println("\nRunning on port " + port + "!\n");
     }
 
     @Override
@@ -55,7 +61,7 @@ public class App extends NanoHTTPD {
             playerA = new Player("A");
             playerB = new Player("B");
             this.game = new Game(playerA, playerB);
-        
+
         } else if (uri.equals("/play")) {
             try {
                 int x = Integer.parseInt(params.get("x"));
@@ -68,7 +74,6 @@ public class App extends NanoHTTPD {
         } else if (uri.equals("/choose")) {
             try {
                 String godName = params.get("god"); // e.g. "DEMETER"
-
                 this.game.chooseGodForCurrentPlayer(godName);
                 System.out.println("Choose: " + godName);
             } catch (Exception e) {
@@ -76,14 +81,12 @@ public class App extends NanoHTTPD {
             }
         } else if (uri.equals("/passBuild")) {
             try {
-                game.passBuild(); // new method you’ll add below
+                game.passBuild(); // new method you'll add below
             } catch (Exception e) {
-            System.err.println("PassBuild error: " + e);
+                System.err.println("PassBuild error: " + e);
             }
         }
 
-        
-    
         // Your original response - UNCHANGED
         GameState gameplay = GameState.forGame(this.game);
         System.out.println("Sending cells: " + gameplay.toString());
