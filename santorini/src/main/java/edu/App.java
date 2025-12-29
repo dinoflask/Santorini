@@ -8,10 +8,15 @@ public class App extends NanoHTTPD {
 
     public static void main(String[] args) {
         try {
-            new App();
-        } catch (IOException ioe) {
-            System.err.println("Couldn't start server:\n" + ioe);
-            System.exit(1); // Ensure clean exit on startup failure
+            App app = new App();
+            System.out.println("🚀 Server running forever... Port: " + app.getListeningPort());
+
+            // KEEP ALIVE FOREVER
+            Thread.currentThread().join();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -20,16 +25,16 @@ public class App extends NanoHTTPD {
     private Player playerB = new Player("B");
 
     /**
-     * Start the server on Render's $PORT (or 8080 locally).
+     * Start the server at dynamic port (Render PORT env or 8080 local).
      * 
      * @throws IOException
      */
     public App() throws IOException {
+        // Render uses PORT env var (10000), fallback to 8080 local
         super((System.getenv("PORT") != null && !System.getenv("PORT").isEmpty())
                 ? Integer.parseInt(System.getenv("PORT"))
                 : 8080);
 
-        System.out.println("Starting server on port " + getListeningPort());
         this.game = new Game(playerA, playerB);
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         System.out.println("\nRunning on port " + getListeningPort() + "!\n");
@@ -37,9 +42,9 @@ public class App extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        System.out.println("Method: " + session.getMethod() + " URI: " + session.getUri()); // DEBUG
+        System.out.println("Method: " + session.getMethod() + " URI: " + session.getUri());
 
-        // Handle OPTIONS preflight FIRST - SIMPLE VERSION
+        // Handle OPTIONS preflight FIRST
         if (session.getMethod() == Method.OPTIONS) {
             Response resp = NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "text/plain", "");
             resp.addHeader("Access-Control-Allow-Origin", "*");
@@ -63,13 +68,13 @@ public class App extends NanoHTTPD {
                 int x = Integer.parseInt(params.get("x"));
                 int y = Integer.parseInt(params.get("y"));
                 this.game.takeTurn(x, y);
-                System.out.println("Play: x=" + x + ", y=" + y); // DEBUG
+                System.out.println("Play: x=" + x + ", y=" + y);
             } catch (Exception e) {
                 System.err.println("Play error: " + e);
             }
         } else if (uri.equals("/choose")) {
             try {
-                String godName = params.get("god"); // e.g. "DEMETER"
+                String godName = params.get("god");
                 this.game.chooseGodForCurrentPlayer(godName);
                 System.out.println("Choose: " + godName);
             } catch (Exception e) {
@@ -77,7 +82,7 @@ public class App extends NanoHTTPD {
             }
         } else if (uri.equals("/passBuild")) {
             try {
-                game.passBuild(); // new method you'll add below
+                game.passBuild();
             } catch (Exception e) {
                 System.err.println("PassBuild error: " + e);
             }
