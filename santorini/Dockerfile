@@ -5,8 +5,11 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Production image
+
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/santorini-1.0-SNAPSHOT.jar app.jar
 EXPOSE 10000
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Pass Render's PORT env var to Java
+ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
