@@ -97,7 +97,7 @@
             <arguments>
               <argument>-classpath</argument>
               <classpath />
-              <argument>edu.cmu.cs214.santorini.Main</argument>
+              <argument>edu.App</argument>
             </arguments>
           </configuration>
         </plugin>
