@@ -3,6 +3,9 @@ import "./App.css"; // import the css file to enable your styles.
 import { GameState, Cell } from "./game";
 import BoardCell from "./Cell.tsx";
 
+
+const API_BASE = "https://Santorini-2.onrender.com";
+
 /**
  * Define the type of the props field for a React component
  */
@@ -36,7 +39,7 @@ class App extends React.Component<Props, AppState> {
 
   newGame = async () => {
     try {
-      const response = await fetch("http://localhost:8080/newgame");
+      const response = await fetch("https://Santorini-2.onrender.com/newgame");
       const json = await response.json();
 
       // SINGLE batched setState - merges all properties
@@ -57,7 +60,9 @@ class App extends React.Component<Props, AppState> {
   play = (x: number, y: number): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(`http://localhost:8080/play?x=${x}&y=${y}`);
+      const response = await fetch(
+        `https://Santorini-2.onrender.com/play?x=${x}&y=${y}`
+      );
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -74,7 +79,9 @@ class App extends React.Component<Props, AppState> {
   chooseGod = (god: string): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(`http://localhost:8080/choose?god=${god}`);
+      const response = await fetch(
+        `https://Santorini-2.onrender.com/choose?god=${god}`
+      );
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -186,7 +193,7 @@ class App extends React.Component<Props, AppState> {
 
   passBuild: React.MouseEventHandler = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:8080/passBuild");
+    const response = await fetch("https://Santorini-2.onrender.com/passBuild");
     const json = await response.json();
     this.setState({
       cells: json["cells"],
@@ -201,7 +208,7 @@ class App extends React.Component<Props, AppState> {
 
   passMove: React.MouseEventHandler = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:8080/passMove");
+    const response = await fetch("https://Santorini-2.onrender.com/passMove");
     const json = await response.json();
     this.setState({
       cells: json["cells"],
