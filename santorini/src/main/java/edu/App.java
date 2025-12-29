@@ -7,14 +7,18 @@ import fi.iki.elonen.NanoHTTPD;
 public class App extends NanoHTTPD {
 
     public static void main(String[] args) {
+        System.out.println("=== MAIN START ===");
         try {
+            System.out.println("1. Creating App...");
             App app = new App();
-            System.out.println("🚀 Server running forever... Port: " + app.getListeningPort());
+            System.out.println("2. App created! Port: " + app.getListeningPort());
+            System.out.println("3. Starting keep-alive...");
 
-            // KEEP ALIVE FOREVER
             Thread.currentThread().join();
+            System.out.println("4. Should never reach here!");
 
         } catch (Exception e) {
+            System.err.println("*** MAIN EXCEPTION: " + e);
             e.printStackTrace();
             System.exit(1);
         }
@@ -30,14 +34,15 @@ public class App extends NanoHTTPD {
      * @throws IOException
      */
     public App() throws IOException {
-        // Render uses PORT env var (10000), fallback to 8080 local
-        super((System.getenv("PORT") != null && !System.getenv("PORT").isEmpty())
-                ? Integer.parseInt(System.getenv("PORT"))
-                : 8080);
+        super(8080); // TEMPORARY - just to compile
+
+        // Dynamic port AFTER super (Render will override)
+        System.out.println("PORT env: " + System.getenv("PORT"));
+        System.out.println("Listening on: " + getListeningPort());
 
         this.game = new Game(playerA, playerB);
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        System.out.println("\nRunning on port " + getListeningPort() + "!\n");
+        System.out.println("✓ Server started!");
     }
 
     @Override
