@@ -3,7 +3,7 @@ import "./App.css";
 import { GameState, Cell } from "./game";
 import BoardCell from "./Cell.tsx";
 
-const API_BASE = "https://Santorini-2.onrender.com";
+const API_BASE = "https://Santorini-2.onrender.com/"; // ← TRAILING SLASH FIXED!
 
 interface Props {}
 
@@ -35,7 +35,7 @@ class App extends React.Component<Props, AppState> {
 
   newGame = async () => {
     try {
-      const response = await fetch(`${API_BASE}/newgame`);
+      const response = await fetch(`${API_BASE}newgame`);
       const json = await response.json();
 
       this.setState({
@@ -55,7 +55,7 @@ class App extends React.Component<Props, AppState> {
   play = (x: number, y: number): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(`${API_BASE}/play?x=${x}&y=${y}`);
+      const response = await fetch(`${API_BASE}play?x=${x}&y=${y}`);
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -72,7 +72,7 @@ class App extends React.Component<Props, AppState> {
   chooseGod = (god: string): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(`${API_BASE}/choose?god=${god}`);
+      const response = await fetch(`${API_BASE}choose?god=${god}`);
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -88,7 +88,7 @@ class App extends React.Component<Props, AppState> {
 
   passBuild: React.MouseEventHandler = async (e) => {
     e.preventDefault();
-    const response = await fetch(`${API_BASE}/passBuild`);
+    const response = await fetch(`${API_BASE}passBuild`);
     const json = await response.json();
     this.setState({
       cells: json["cells"],
@@ -103,7 +103,7 @@ class App extends React.Component<Props, AppState> {
 
   passMove: React.MouseEventHandler = async (e) => {
     e.preventDefault();
-    const response = await fetch(`${API_BASE}/passMove`);
+    const response = await fetch(`${API_BASE}passMove`);
     const json = await response.json();
     this.setState({
       cells: json["cells"],
