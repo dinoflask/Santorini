@@ -25,18 +25,14 @@ public class App extends NanoHTTPD {
      * @throws IOException
      */
     public App() throws IOException {
-        // Fix for Render: use $PORT env var, fallback to 8080 for local dev
-        String portStr = System.getenv("PORT");
-        int port = (portStr != null && !portStr.isEmpty()) ? Integer.parseInt(portStr) : 8080;
+        super((System.getenv("PORT") != null && !System.getenv("PORT").isEmpty())
+                ? Integer.parseInt(System.getenv("PORT"))
+                : 8080);
 
-        super(port);
-
-        System.out.println("Starting server on port " + port); // RENDER LOG CONFIRMATION
-
+        System.out.println("Starting server on port " + getListeningPort());
         this.game = new Game(playerA, playerB);
-
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        System.out.println("\nRunning on port " + port + "!\n");
+        System.out.println("\nRunning on port " + getListeningPort() + "!\n");
     }
 
     @Override
