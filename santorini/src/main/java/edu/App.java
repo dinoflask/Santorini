@@ -34,9 +34,9 @@ public class App extends NanoHTTPD {
      * @throws IOException
      */
     public App() throws IOException {
-        super(8080); // TEMPORARY - just to compile
+        // ✅ FIRST STATEMENT - constructor call ONLY
+        super(System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 8080);
 
-        // Dynamic port AFTER super (Render will override)
         System.out.println("PORT env: " + System.getenv("PORT"));
         System.out.println("Listening on: " + getListeningPort());
 

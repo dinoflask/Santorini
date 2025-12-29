@@ -65,8 +65,8 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.3.0</version>
           <configuration>
-        <skipTests>true</skipTests>
-    </configuration>
+            <skipTests>true</skipTests>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
@@ -92,30 +92,39 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.6.2</version>
-          <configuration>
-            <executable>java</executable>
-            <arguments>
-              <argument>-classpath</argument>
-              <classpath />
-              <argument>edu.App</argument>
-            </arguments>
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
 
-    <!-- ADDED: This makes JAR executable -->
+    <!-- FIXED: JAR + Exec both run edu.App -->
     <plugins>
+      <!-- JAR executable - runs edu.App.main() -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>edu.cmu.cs214.santorini.Main</mainClass> <!-- From your exec plugin config -->
+              <mainClass>edu.App</mainClass> <!-- ✅ App.main() = NanoHTTPD server -->
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+
+      <!-- Local exec: mvn compile exec:java -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>edu.App</mainClass> <!-- ✅ App.main() = NanoHTTPD server -->
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
