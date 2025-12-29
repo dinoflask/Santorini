@@ -1,14 +1,10 @@
 import React from "react";
-import "./App.css"; // import the css file to enable your styles.
+import "./App.css";
 import { GameState, Cell } from "./game";
 import BoardCell from "./Cell.tsx";
 
-
 const API_BASE = "https://Santorini-2.onrender.com";
 
-/**
- * Define the type of the props field for a React component
- */
 interface Props {}
 
 interface AppState {
@@ -18,7 +14,7 @@ interface AppState {
   turnPhase: string | null;
   godCards: string[];
   canPassBuild: boolean;
-  canPassMove: boolean; // NEW
+  canPassMove: boolean;
 }
 
 class App extends React.Component<Props, AppState> {
@@ -28,21 +24,20 @@ class App extends React.Component<Props, AppState> {
     super(props);
     this.state = {
       cells: [],
-      currentPlayer: "", // for example, tracking whose turn it is
+      currentPlayer: "",
       winner: null,
       turnPhase: null,
       godCards: [],
       canPassBuild: false,
-      canPassMove: false, // NEW
+      canPassMove: false,
     };
   }
 
   newGame = async () => {
     try {
-      const response = await fetch("https://Santorini-2.onrender.com/newgame");
+      const response = await fetch(`${API_BASE}/newgame`);
       const json = await response.json();
 
-      // SINGLE batched setState - merges all properties
       this.setState({
         cells: json["cells"],
         currentPlayer: json["currentPlayer"],
@@ -50,7 +45,7 @@ class App extends React.Component<Props, AppState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
-        canPassMove: json["canPassMove"] ?? false, // NEW
+        canPassMove: json["canPassMove"] ?? false,
       });
     } catch (error) {
       console.error("New Game failed:", error);
@@ -60,9 +55,7 @@ class App extends React.Component<Props, AppState> {
   play = (x: number, y: number): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(
-        `https://Santorini-2.onrender.com/play?x=${x}&y=${y}`
-      );
+      const response = await fetch(`${API_BASE}/play?x=${x}&y=${y}`);
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -71,7 +64,7 @@ class App extends React.Component<Props, AppState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
-        canPassMove: json["canPassMove"] ?? false, // NEW
+        canPassMove: json["canPassMove"] ?? false,
       });
     };
   };
@@ -79,9 +72,7 @@ class App extends React.Component<Props, AppState> {
   chooseGod = (god: string): React.MouseEventHandler => {
     return async (e) => {
       e.preventDefault();
-      const response = await fetch(
-        `https://Santorini-2.onrender.com/choose?god=${god}`
-      );
+      const response = await fetch(`${API_BASE}/choose?god=${god}`);
       const json = await response.json();
       this.setState({
         cells: json["cells"],
@@ -90,9 +81,39 @@ class App extends React.Component<Props, AppState> {
         turnPhase: json["turnPhase"],
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
-        canPassMove: json["canPassMove"] ?? false, // NEW
+        canPassMove: json["canPassMove"] ?? false,
       });
     };
+  };
+
+  passBuild: React.MouseEventHandler = async (e) => {
+    e.preventDefault();
+    const response = await fetch(`${API_BASE}/passBuild`);
+    const json = await response.json();
+    this.setState({
+      cells: json["cells"],
+      currentPlayer: json["currentPlayer"],
+      winner: json["winner"],
+      turnPhase: json["turnPhase"],
+      godCards: json["godCards"] ?? [],
+      canPassBuild: json["canPassBuild"] ?? false,
+      canPassMove: json["canPassMove"] ?? false,
+    });
+  };
+
+  passMove: React.MouseEventHandler = async (e) => {
+    e.preventDefault();
+    const response = await fetch(`${API_BASE}/passMove`);
+    const json = await response.json();
+    this.setState({
+      cells: json["cells"],
+      currentPlayer: json["currentPlayer"],
+      winner: json["winner"],
+      turnPhase: json["turnPhase"],
+      godCards: json["godCards"] ?? [],
+      canPassBuild: json["canPassBuild"] ?? false,
+      canPassMove: json["canPassMove"] ?? false,
+    });
   };
 
   createCell(cell: Cell, index: number): React.ReactNode {
@@ -137,7 +158,6 @@ class App extends React.Component<Props, AppState> {
     return (
       <div id="app-container">
         <header id="app-header">Santorini</header>
-        {/* Winner popup stays fixed */}
         {this.state.winner != -1 && (
           <div id="winner-popup">
             <div id="winner-message">
@@ -146,7 +166,6 @@ class App extends React.Component<Props, AppState> {
           </div>
         )}
 
-        {/* Main game UI - centered and scaled */}
         <div id="game-ui">
           <div id="board">
             {this.state.cells.map((cell, i) => this.createCell(cell, i))}
@@ -190,36 +209,6 @@ class App extends React.Component<Props, AppState> {
       </div>
     );
   }
-
-  passBuild: React.MouseEventHandler = async (e) => {
-    e.preventDefault();
-    const response = await fetch("https://Santorini-2.onrender.com/passBuild");
-    const json = await response.json();
-    this.setState({
-      cells: json["cells"],
-      currentPlayer: json["currentPlayer"],
-      winner: json["winner"],
-      turnPhase: json["turnPhase"],
-      godCards: json["godCards"] ?? [],
-      canPassBuild: json["canPassBuild"] ?? false,
-      canPassMove: json["canPassMove"] ?? false, // NEW
-    });
-  };
-
-  passMove: React.MouseEventHandler = async (e) => {
-    e.preventDefault();
-    const response = await fetch("https://Santorini-2.onrender.com/passMove");
-    const json = await response.json();
-    this.setState({
-      cells: json["cells"],
-      currentPlayer: json["currentPlayer"],
-      winner: json["winner"],
-      turnPhase: json["turnPhase"],
-      godCards: json["godCards"] ?? [],
-      canPassBuild: json["canPassBuild"] ?? false,
-      canPassMove: json["canPassMove"] ?? false, // NEW
-    });
-  };
 }
 
 export default App;
