@@ -34,18 +34,24 @@ public class App extends NanoHTTPD {
      * @throws IOException
      */
     public App() throws IOException {
-        // ✅ FIRST STATEMENT - ternary INSIDE super()
-        super(System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 8080);
+        // 1. FIRST: Use fixed port 8080 (legal super call)
+        super(8080);
+
+        // 2. THEN: Rebind to correct Render port
+        String portStr = System.getenv("PORT");
+        if (portStr == null)
+            portStr = System.getProperty("server.port", "8080");
+        int port = Integer.parseInt(portStr);
+
+        // Stop default, start on real port
+        stop();
+        start(port, false);
+
+        System.out.println("PORT env: " + portStr);
+        System.out.println("Listening on: " + getListeningPort());
 
         this.game = new Game(playerA, playerB);
-
-        // Start server
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-
-        // Log AFTER start()
-        System.out.println("PORT env: " + System.getenv("PORT"));
-        System.out.println("Listening on: " + getListeningPort());
-        System.out.println("✓ Server started!");
+        System.out.println("✓ Server started on " + getListeningPort());
     }
 
     @Override
