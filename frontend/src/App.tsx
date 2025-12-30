@@ -3,7 +3,7 @@ import "./App.css";
 import { GameState, Cell } from "./game";
 import BoardCell from "./Cell.tsx";
 
-const API_BASE = "https://santorini-2.onrender.com/"; // ← TRAILING SLASH FIXED!
+const API_BASE = "https://santorini-2.onrender.com/";
 
 interface Props {}
 
@@ -34,108 +34,157 @@ class App extends React.Component<Props, AppState> {
   }
 
   newGame = async () => {
+    console.log("🔍 Calling newGame →", `${API_BASE}newgame`);
     try {
       const response = await fetch(`${API_BASE}newgame`);
+      console.log("📡 Response status:", response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const json = await response.json();
-
+      console.log("✅ New game loaded:", json);
       this.setState({
-        cells: json["cells"],
-        currentPlayer: json["currentPlayer"],
-        winner: json["winner"],
-        turnPhase: json["turnPhase"],
+        cells: json["cells"] || [],
+        currentPlayer: json["currentPlayer"] || "",
+        winner: json["winner"] || null,
+        turnPhase: json["turnPhase"] || null,
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
         canPassMove: json["canPassMove"] ?? false,
       });
     } catch (error) {
-      console.error("New Game failed:", error);
+      console.error("❌ New Game failed:", error);
     }
   };
 
   play = (x: number, y: number): React.MouseEventHandler => {
-    return async (e) => {
+    return async (e: React.MouseEvent) => {
       e.preventDefault();
-      const response = await fetch(`${API_BASE}play?x=${x}&y=${y}`);
-      const json = await response.json();
-      this.setState({
-        cells: json["cells"],
-        currentPlayer: json["currentPlayer"],
-        winner: json["winner"],
-        turnPhase: json["turnPhase"],
-        godCards: json["godCards"] ?? [],
-        canPassBuild: json["canPassBuild"] ?? false,
-        canPassMove: json["canPassMove"] ?? false,
-      });
+      console.log("🔍 Playing:", x, y);
+      try {
+        const response = await fetch(`${API_BASE}play?x=${x}&y=${y}`);
+        console.log("📡 Play response:", response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const json = await response.json();
+        this.setState({
+          cells: json["cells"] || [],
+          currentPlayer: json["currentPlayer"] || "",
+          winner: json["winner"] || null,
+          turnPhase: json["turnPhase"] || null,
+          godCards: json["godCards"] ?? [],
+          canPassBuild: json["canPassBuild"] ?? false,
+          canPassMove: json["canPassMove"] ?? false,
+        });
+      } catch (error) {
+        console.error("❌ Play failed:", error);
+      }
     };
   };
 
   chooseGod = (god: string): React.MouseEventHandler => {
-    return async (e) => {
+    return async (e: React.MouseEvent) => {
       e.preventDefault();
-      const response = await fetch(`${API_BASE}choose?god=${god}`);
+      console.log("🔍 Choosing god:", god);
+      try {
+        const response = await fetch(`${API_BASE}choose?god=${god}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const json = await response.json();
+        this.setState({
+          cells: json["cells"] || [],
+          currentPlayer: json["currentPlayer"] || "",
+          winner: json["winner"] || null,
+          turnPhase: json["turnPhase"] || null,
+          godCards: json["godCards"] ?? [],
+          canPassBuild: json["canPassBuild"] ?? false,
+          canPassMove: json["canPassMove"] ?? false,
+        });
+      } catch (error) {
+        console.error("❌ Choose failed:", error);
+      }
+    };
+  };
+
+  passBuild: React.MouseEventHandler = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("🔍 Pass build");
+    try {
+      const response = await fetch(`${API_BASE}passBuild`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const json = await response.json();
       this.setState({
-        cells: json["cells"],
-        currentPlayer: json["currentPlayer"],
-        winner: json["winner"],
-        turnPhase: json["turnPhase"],
+        cells: json["cells"] || [],
+        currentPlayer: json["currentPlayer"] || "",
+        winner: json["winner"] || null,
+        turnPhase: json["turnPhase"] || null,
         godCards: json["godCards"] ?? [],
         canPassBuild: json["canPassBuild"] ?? false,
         canPassMove: json["canPassMove"] ?? false,
       });
-    };
+    } catch (error) {
+      console.error("❌ PassBuild failed:", error);
+    }
   };
 
-  passBuild: React.MouseEventHandler = async (e) => {
+  passMove: React.MouseEventHandler = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const response = await fetch(`${API_BASE}passBuild`);
-    const json = await response.json();
-    this.setState({
-      cells: json["cells"],
-      currentPlayer: json["currentPlayer"],
-      winner: json["winner"],
-      turnPhase: json["turnPhase"],
-      godCards: json["godCards"] ?? [],
-      canPassBuild: json["canPassBuild"] ?? false,
-      canPassMove: json["canPassMove"] ?? false,
-    });
-  };
-
-  passMove: React.MouseEventHandler = async (e) => {
-    e.preventDefault();
-    const response = await fetch(`${API_BASE}passMove`);
-    const json = await response.json();
-    this.setState({
-      cells: json["cells"],
-      currentPlayer: json["currentPlayer"],
-      winner: json["winner"],
-      turnPhase: json["turnPhase"],
-      godCards: json["godCards"] ?? [],
-      canPassBuild: json["canPassBuild"] ?? false,
-      canPassMove: json["canPassMove"] ?? false,
-    });
+    console.log("🔍 Pass move");
+    try {
+      const response = await fetch(`${API_BASE}passMove`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const json = await response.json();
+      this.setState({
+        cells: json["cells"] || [],
+        currentPlayer: json["currentPlayer"] || "",
+        winner: json["winner"] || null,
+        turnPhase: json["turnPhase"] || null,
+        godCards: json["godCards"] ?? [],
+        canPassBuild: json["canPassBuild"] ?? false,
+        canPassMove: json["canPassMove"] ?? false,
+      });
+    } catch (error) {
+      console.error("❌ PassMove failed:", error);
+    }
   };
 
   createCell(cell: Cell, index: number): React.ReactNode {
-    if (cell.playable)
+    if (cell.playable) {
       return (
         <div key={index}>
           <a href="/" onClick={this.play(cell.x, cell.y)}>
-            <BoardCell cell={cell}></BoardCell>
+            <BoardCell cell={cell} />
           </a>
         </div>
       );
-    else
+    } else {
       return (
         <div key={index}>
-          <BoardCell cell={cell}></BoardCell>
+          <BoardCell cell={cell} />
         </div>
       );
+    }
   }
 
   componentDidMount(): void {
+    console.log("🚀 App mounted, testing backend...");
     if (!this.initialized) {
-      this.newGame();
+      // Test backend first
+      fetch(API_BASE)
+        .then((r) => r.text())
+        .then((text) => {
+          console.log("✅ Backend alive:", text.substring(0, 200));
+          this.newGame();
+        })
+        .catch((e) => {
+          console.error("❌ Backend unreachable:", e);
+        });
       this.initialized = true;
     }
   }
@@ -144,21 +193,20 @@ class App extends React.Component<Props, AppState> {
     if (this.state.turnPhase === "GOD_SELECTION") {
       return this.renderGodSelection();
     }
+
     let instructionsText = "";
-    if (this.state.winner == -1) {
-      instructionsText = `Current turn: ${this.state.currentPlayer}`;
+    if (this.state.winner === null || this.state.winner === -1) {
+      instructionsText = `Current turn: ${
+        this.state.currentPlayer || "Loading..."
+      }`;
     } else {
-      if (this.state.winner == 0) {
-        instructionsText = `Winner: A`;
-      } else {
-        instructionsText = `Winner: B`;
-      }
+      instructionsText = `Winner: ${this.state.winner === 0 ? "A" : "B"}`;
     }
 
     return (
       <div id="app-container">
         <header id="app-header">Santorini</header>
-        {this.state.winner != -1 && (
+        {this.state.winner !== null && this.state.winner !== -1 && (
           <div id="winner-popup">
             <div id="winner-message">
               Winner: {this.state.winner === 0 ? "A" : "B"}
