@@ -6,23 +6,27 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class App extends NanoHTTPD {
 
+    private static final int TARGET_PORT;
+    static {
+        String portStr = System.getenv("PORT");
+        if (portStr == null)
+            portStr = System.getProperty("server.port", "8080");
+        TARGET_PORT = Integer.parseInt(portStr);
+        System.out.println("PORT env: " + portStr);
+    }
+
+    private Game game;
+    private Player playerA = new Player("A");
+    private Player playerB = new Player("B");
+
     public static void main(String[] args) {
         System.out.println("=== MAIN START ===");
         try {
-            App app = new App(8080); // Pass initial port
+            App app = new App();
             System.out.println("2. App created! Port: " + app.getListeningPort());
-
-            // Keep JVM alive WITHOUT blocking main thread
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.out.println("Shutting down server...");
-                app.stop();
-            }));
-
             System.out.println("3. Server running on port " + app.getListeningPort() + ". Press Ctrl+C to stop.");
 
-            // Non-blocking wait
             Thread.currentThread().join();
-
         } catch (Exception e) {
             System.err.println("*** MAIN EXCEPTION: " + e);
             e.printStackTrace();
@@ -30,31 +34,19 @@ public class App extends NanoHTTPD {
         }
     }
 
-    private Game game;
-    private Player playerA = new Player("A");
-    private Player playerB = new Player("B");
-
     /**
-     * Start the server at dynamic port (Render PORT env or 8080 local).
-     * 
-     * @throws IOException
+     * Constructor binds directly to correct port using static TARGET_PORT
      */
-    public App(int initialPort) throws IOException {
-        super(initialPort);
+    public App() throws IOException {
+        // FIRST STATEMENT: Use pre-computed port from static block
+        super(TARGET_PORT);
+        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
 
-        // Rebind to correct port (Render PORT or fallback)
-        String portStr = System.getenv("PORT");
-        if (portStr == null)
-            portStr = System.getProperty("server.port", "8080");
-        int targetPort = Integer.parseInt(portStr);
-
-        if (targetPort != initialPort) {
-            stop(); // Stop initial binding
-            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false); // Use default thread pool
-            System.out.println("Rebound to port: " + targetPort);
+        if (getListeningPort() == -1) {
+            throw new IOException("Failed to bind to port " + TARGET_PORT);
         }
 
-        System.out.println("PORT env: " + portStr + ", Listening on: " + getListeningPort());
+        System.out.println("Listening on: " + getListeningPort());
         this.game = new Game(playerA, playerB);
         System.out.println("✓ Server started on " + getListeningPort());
     }
