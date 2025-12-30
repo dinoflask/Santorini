@@ -31,17 +31,16 @@ public class App extends NanoHTTPD {
 
     // Private constructor with port parameter - reads env here
     private App(int port) throws IOException {
-        super(8080); // Must call super FIRST with any valid port
-
-        // Now safe to stop and rebind to real port
+        super(8080);
         stop();
         start(port, false);
 
-        if (getListeningPort() == -1) {
-            throw new IOException("Failed to bind to port " + port);
+        int actualPort = getListeningPort();
+        if (actualPort == -1 || actualPort != port) {
+            throw new IOException("FATAL: Expected port " + port + ", got " + actualPort);
         }
 
-        System.out.println("PORT env: " + port + ", Listening on: " + getListeningPort());
+        System.out.println("✅ BOUND CORRECTLY: " + actualPort);
         this.game = new Game(playerA, playerB);
         System.out.println("✓ Server started on " + getListeningPort());
     }
