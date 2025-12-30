@@ -34,14 +34,17 @@ public class App extends NanoHTTPD {
      * @throws IOException
      */
     public App() throws IOException {
-        // ✅ FIRST STATEMENT - constructor call ONLY
+        // ✅ FIRST STATEMENT - ternary INSIDE super()
         super(System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 8080);
 
+        this.game = new Game(playerA, playerB);
+
+        // Start server
+        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+
+        // Log AFTER start()
         System.out.println("PORT env: " + System.getenv("PORT"));
         System.out.println("Listening on: " + getListeningPort());
-
-        this.game = new Game(playerA, playerB);
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         System.out.println("✓ Server started!");
     }
 
