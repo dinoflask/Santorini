@@ -6,15 +6,6 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class App extends NanoHTTPD {
 
-    private static final int TARGET_PORT;
-    static {
-        String portStr = System.getenv("PORT");
-        if (portStr == null)
-            portStr = System.getProperty("server.port", "8080");
-        TARGET_PORT = Integer.parseInt(portStr);
-        System.out.println("PORT env: " + portStr);
-    }
-
     private Game game;
     private Player playerA = new Player("A");
     private Player playerB = new Player("B");
@@ -25,7 +16,6 @@ public class App extends NanoHTTPD {
             App app = new App();
             System.out.println("2. App created! Port: " + app.getListeningPort());
             System.out.println("3. Server running on port " + app.getListeningPort() + ". Press Ctrl+C to stop.");
-
             Thread.currentThread().join();
         } catch (Exception e) {
             System.err.println("*** MAIN EXCEPTION: " + e);
@@ -34,28 +24,40 @@ public class App extends NanoHTTPD {
         }
     }
 
-    /**
-     * Constructor binds directly to correct port using static TARGET_PORT
-     */
+    // Public no-arg constructor - FIRST calls private helper
     public App() throws IOException {
-        // FIRST STATEMENT: Use pre-computed port from static block
-        super(TARGET_PORT);
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+        this(determinePort());
+    }
+
+    // Private constructor with port parameter - reads env here
+    private App(int port) throws IOException {
+        super(8080); // Must call super FIRST with any valid port
+
+        // Now safe to stop and rebind to real port
+        stop();
+        start(port, false);
 
         if (getListeningPort() == -1) {
-            throw new IOException("Failed to bind to port " + TARGET_PORT);
+            throw new IOException("Failed to bind to port " + port);
         }
 
-        System.out.println("Listening on: " + getListeningPort());
+        System.out.println("PORT env: " + port + ", Listening on: " + getListeningPort());
         this.game = new Game(playerA, playerB);
         System.out.println("✓ Server started on " + getListeningPort());
+    }
+
+    // Static helper - reads env after container startup
+    private static int determinePort() {
+        String portStr = System.getenv("PORT");
+        if (portStr == null)
+            portStr = "10000"; // Render default
+        return Integer.parseInt(portStr);
     }
 
     @Override
     public Response serve(IHTTPSession session) {
         System.out.println("Method: " + session.getMethod() + " URI: " + session.getUri());
 
-        // Handle OPTIONS preflight FIRST
         if (session.getMethod() == Method.OPTIONS) {
             Response resp = NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "text/plain", "");
             resp.addHeader("Access-Control-Allow-Origin", "*");
@@ -65,7 +67,6 @@ public class App extends NanoHTTPD {
             return resp;
         }
 
-        // Your original business logic - UNCHANGED
         String uri = session.getUri();
         Map<String, String> params = session.getParms();
 
@@ -73,7 +74,6 @@ public class App extends NanoHTTPD {
             playerA = new Player("A");
             playerB = new Player("B");
             this.game = new Game(playerA, playerB);
-
         } else if (uri.equals("/play")) {
             try {
                 int x = Integer.parseInt(params.get("x"));
@@ -99,7 +99,6 @@ public class App extends NanoHTTPD {
             }
         }
 
-        // Your original response - UNCHANGED
         GameState gameplay = GameState.forGame(this.game);
         System.out.println("Sending cells: " + gameplay.toString());
         Response resp = NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "application/json", gameplay.toString());
