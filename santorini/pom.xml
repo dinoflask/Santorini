@@ -96,32 +96,59 @@
       </plugins>
     </pluginManagement>
 
-    <!-- FIXED: JAR + Exec both run edu.App -->
+    <!-- FIXED: FAT JAR + Exec both run edu.App -->
     <plugins>
-      <!-- JAR executable - runs edu.App.main() -->
+      <!-- 1. Base JAR manifest (shade overrides this) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>edu.App</mainClass> <!-- ✅ App.main() = NanoHTTPD server -->
+              <mainClass>edu.App</mainClass>
             </manifest>
           </archive>
         </configuration>
       </plugin>
 
-      <!-- Local exec: mvn compile exec:java -->
+      <!-- 2. FAT JAR - includes nanohttpd + ALL deps -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>edu.App</mainClass>
+                </transformer>
+              </transformers>
+              <!-- Output filename: santorini-1.0-SNAPSHOT.jar (FAT) -->
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 3. Local exec: mvn compile exec:java -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>run-app</id>
+            <phase>compile</phase>
             <goals>
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>edu.App</mainClass> <!-- ✅ App.main() = NanoHTTPD server -->
+              <mainClass>edu.App</mainClass>
             </configuration>
           </execution>
         </executions>
