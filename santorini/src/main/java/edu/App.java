@@ -9,13 +9,19 @@ public class App extends NanoHTTPD {
     public static void main(String[] args) {
         System.out.println("=== MAIN START ===");
         try {
-            System.out.println("1. Creating App...");
-            App app = new App();
+            App app = new App(8080); // Pass initial port
             System.out.println("2. App created! Port: " + app.getListeningPort());
-            System.out.println("3. Starting keep-alive...");
 
+            // Keep JVM alive WITHOUT blocking main thread
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutting down server...");
+                app.stop();
+            }));
+
+            System.out.println("3. Server running on port " + app.getListeningPort() + ". Press Ctrl+C to stop.");
+
+            // Non-blocking wait
             Thread.currentThread().join();
-            System.out.println("4. Should never reach here!");
 
         } catch (Exception e) {
             System.err.println("*** MAIN EXCEPTION: " + e);
@@ -33,23 +39,22 @@ public class App extends NanoHTTPD {
      * 
      * @throws IOException
      */
-    public App() throws IOException {
-        // 1. FIRST: Use fixed port 8080 (legal super call)
-        super(8080);
+    public App(int initialPort) throws IOException {
+        super(initialPort);
 
-        // 2. THEN: Rebind to correct Render port
+        // Rebind to correct port (Render PORT or fallback)
         String portStr = System.getenv("PORT");
         if (portStr == null)
             portStr = System.getProperty("server.port", "8080");
-        int port = Integer.parseInt(portStr);
+        int targetPort = Integer.parseInt(portStr);
 
-        // Stop default, start on real port
-        stop();
-        start(port, false);
+        if (targetPort != initialPort) {
+            stop(); // Stop initial binding
+            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false); // Use default thread pool
+            System.out.println("Rebound to port: " + targetPort);
+        }
 
-        System.out.println("PORT env: " + portStr);
-        System.out.println("Listening on: " + getListeningPort());
-
+        System.out.println("PORT env: " + portStr + ", Listening on: " + getListeningPort());
         this.game = new Game(playerA, playerB);
         System.out.println("✓ Server started on " + getListeningPort());
     }

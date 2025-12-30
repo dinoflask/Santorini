@@ -10,4 +10,5 @@ WORKDIR /app
 COPY --from=build /app/target/santorini-1.0-SNAPSHOT.jar app.jar
 EXPOSE 10000
 # ✅ FORCE Render PORT=10000
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=10000 -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=$${PORT:-10000} -jar app.jar"]
+
