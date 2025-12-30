@@ -3,7 +3,7 @@ import "./App.css";
 import { GameState, Cell } from "./game";
 import BoardCell from "./Cell.tsx";
 
-const API_BASE = "https://Santorini-2.onrender.com/"; // ← TRAILING SLASH FIXED!
+const API_BASE = "https://santorini-2.onrender.com/"; // ← TRAILING SLASH FIXED!
 
 interface Props {}
 
